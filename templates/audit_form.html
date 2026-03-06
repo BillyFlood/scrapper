@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Your Audit — Scrapper</title>
+  <title>Start Your Audit — Scrapper</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display:ital,wght@0,700;0,800;1,700;1,800&display=swap" rel="stylesheet">
   <style>
@@ -11,6 +11,7 @@
     :root {
       --bg:          #f0ece3;
       --bg-warm:     #e8e2d6;
+      --bg-alt:      #e2ddd3;
       --ink:         #1a1a14;
       --ink-mid:     #3a3a2e;
       --ink-muted:   #7a7a68;
@@ -23,14 +24,14 @@
       --sage-light:  #90b882;
       --pale-sage:   #c8dcc0;
       --mint-wash:   #e4efe0;
+      --bark:        #2c1e10;
       --umber:       #4a3020;
       --brown-mid:   #6e5038;
       --tan:         #9a7a58;
+      --parchment:   #e0ceb0;
       --parchment-lt:#ede0c8;
       --border:      rgba(26,26,20,0.1);
       --border-mid:  rgba(26,26,20,0.15);
-      --red:         #904040;
-      --amber:       #8a6030;
       --display:     'Playfair Display', Georgia, serif;
     }
     html { scroll-behavior: smooth; }
@@ -54,188 +55,241 @@
       backdrop-filter: blur(16px);
       border-bottom: 1px solid var(--border);
     }
-    .nav-logo { font-family: var(--display); font-size: 1.3rem; font-weight: 700; color: var(--ink); text-decoration: none; }
-    .nav-actions { display: flex; align-items: center; gap: 1rem; }
-    .nav-btn {
+    .nav-logo {
+      font-family: var(--display);
+      font-size: 1.3rem; font-weight: 700;
+      color: var(--ink); text-decoration: none;
+    }
+    .nav-back {
       font-size: 0.72rem; color: var(--ink-muted);
-      text-decoration: none; letter-spacing: 0.04em;
-      transition: color 0.2s; cursor: none;
-      background: none; border: none; font-family: 'Inter', sans-serif;
+      text-decoration: none; letter-spacing: 0.06em;
+      display: flex; align-items: center; gap: 0.4rem;
+      transition: color 0.2s;
     }
-    .nav-btn:hover { color: var(--ink); }
-    .nav-btn.primary {
-      color: var(--bg); background: var(--forest);
-      padding: 0.42rem 1.1rem; border-radius: 2px;
-      font-weight: 500;
-    }
-    .nav-btn.primary:hover { background: var(--canopy); }
+    .nav-back:hover { color: var(--ink); }
 
-    /* Report header */
-    .report-header {
-      background: var(--forest); color: #fff;
-      padding: 5rem 4% 3rem;
-    }
-    .report-eyebrow {
-      font-size: 0.62rem; letter-spacing: 0.2em;
-      text-transform: uppercase; color: rgba(255,255,255,0.35);
-      display: flex; align-items: center; gap: 0.7rem;
-      margin-bottom: 1.2rem;
-    }
-    .report-eyebrow::before { content:''; width:16px; height:1px; background:currentColor; }
-    .report-header h1 {
-      font-family: var(--display);
-      font-size: clamp(2rem, 4vw, 3.2rem);
-      font-weight: 800; line-height: 1.1;
-      letter-spacing: -0.02em; color: #fff;
-      margin-bottom: 0.5rem;
-    }
-    .report-header h1 em { font-style: italic; color: var(--sage-light); }
-    .report-meta {
-      font-size: 0.65rem; color: rgba(255,255,255,0.3);
-      letter-spacing: 0.1em; text-transform: uppercase;
+    .page-wrap {
+      max-width: 760px; margin: 0 auto;
+      padding: 6rem 4% 5rem;
     }
 
-    /* Main content */
-    .report-body { max-width: 860px; margin: 0 auto; padding: 3rem 4% 5rem; }
-
-    /* ── STYLES FOR CLAUDE'S HTML OUTPUT ── */
-    .audit-report {}
-
-    .audit-section {
-      background: #fff;
-      border: 1px solid var(--border);
-      border-radius: 3px;
-      padding: 2rem;
-      margin-bottom: 1.2rem;
-      box-shadow: 0 2px 12px rgba(26,26,20,0.04);
-    }
-
-    .audit-section h2 {
-      font-family: var(--display);
-      font-size: 1.25rem; font-weight: 700;
-      color: var(--ink); margin-bottom: 1.2rem;
-      padding-bottom: 0.8rem;
+    .page-header {
+      padding-bottom: 2.5rem;
       border-bottom: 1px solid var(--border);
-      letter-spacing: -0.01em;
+      margin-bottom: 3rem;
+    }
+    .page-eyebrow {
+      font-size: 0.62rem; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--ink-muted);
+      display: flex; align-items: center; gap: 0.7rem;
+      margin-bottom: 1rem;
+    }
+    .page-eyebrow::before { content:''; width:16px; height:1px; background:currentColor; }
+    .page-header h1 {
+      font-family: var(--display);
+      font-size: clamp(2.2rem, 4vw, 3.2rem);
+      font-weight: 800; line-height: 1.1;
+      letter-spacing: -0.02em; color: var(--ink);
+      margin-bottom: 0.8rem;
+    }
+    .page-header p {
+      font-size: 0.85rem; color: var(--ink-muted);
+      line-height: 1.75; font-weight: 300; max-width: 520px;
     }
 
-    /* Summary section */
-    .summary-section { border-top: 3px solid var(--moss); }
-    .summary-intro {
-      font-size: 0.92rem; color: var(--ink-mid);
-      line-height: 1.75; margin-bottom: 1.2rem;
-      font-weight: 400;
+    /* Progress */
+    .progress-bar {
+      height: 2px; background: var(--border);
+      margin-bottom: 3rem; border-radius: 1px; overflow: hidden;
     }
-    .metrics-row {
-      display: grid; grid-template-columns: repeat(4,1fr);
-      gap: 0.8rem;
+    .progress-fill {
+      height: 100%; background: var(--moss);
+      width: 0%; transition: width 0.5s ease;
     }
-    .metric-box {
-      background: var(--bg);
+
+    /* Form sections */
+    .form-section {
+      margin-bottom: 3rem;
+      padding-bottom: 3rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .form-section:last-of-type { border-bottom: none; }
+    .form-section-label {
+      font-size: 0.6rem; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--ink-muted);
+      display: flex; align-items: center; gap: 0.6rem;
+      margin-bottom: 2rem;
+    }
+    .form-section-label::before { content:''; width:14px; height:1px; background:currentColor; }
+
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+    .form-grid.full { grid-template-columns: 1fr; }
+
+    .field { display: flex; flex-direction: column; gap: 0.4rem; }
+    .field label {
+      font-size: 0.72rem; font-weight: 500;
+      color: var(--ink-mid); letter-spacing: 0.02em;
+    }
+    .field input, .field select, .field textarea {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.82rem; font-weight: 300;
+      color: var(--ink);
+      background: #fff;
+      border: 1px solid var(--border-mid);
+      border-radius: 2px;
+      padding: 0.7rem 0.9rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      appearance: none;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus {
+      border-color: var(--moss);
+      box-shadow: 0 0 0 3px rgba(78,116,80,0.1);
+    }
+    .field textarea { resize: vertical; min-height: 100px; line-height: 1.6; }
+    .field select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%237a7a68'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.9rem center;
+      padding-right: 2.2rem;
+      cursor: none;
+    }
+
+    /* Checkboxes */
+    .checkbox-grid {
+      display: grid; grid-template-columns: repeat(3,1fr);
+      gap: 0.5rem;
+    }
+    .check-item {
+      display: flex; align-items: center; gap: 0.55rem;
+      padding: 0.6rem 0.8rem;
       border: 1px solid var(--border);
-      border-radius: 2px; padding: 1rem;
+      border-radius: 2px; background: #fff;
+      cursor: none; transition: all 0.18s;
+      user-select: none;
+    }
+    .check-item:hover { border-color: var(--moss); background: var(--mint-wash); }
+    .check-item input[type="checkbox"] { display: none; }
+    .check-box {
+      width: 14px; height: 14px; flex-shrink: 0;
+      border: 1px solid var(--border-mid);
+      border-radius: 2px; background: #fff;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.18s;
+    }
+    .check-item input:checked ~ .check-box {
+      background: var(--moss); border-color: var(--moss);
+    }
+    .check-item input:checked ~ .check-box::after {
+      content: ''; width: 6px; height: 4px;
+      border-left: 1.5px solid #fff; border-bottom: 1.5px solid #fff;
+      transform: rotate(-45deg) translate(0px, -1px);
+      display: block;
+    }
+    .check-label { font-size: 0.78rem; color: var(--ink-mid); }
+
+    /* Radio buttons */
+    .radio-row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .radio-item {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.55rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 2px; background: #fff;
+      cursor: none; transition: all 0.18s;
+    }
+    .radio-item:hover { border-color: var(--moss); }
+    .radio-item input[type="radio"] { display: none; }
+    .radio-dot {
+      width: 12px; height: 12px; flex-shrink: 0;
+      border: 1px solid var(--border-mid);
+      border-radius: 50%; background: #fff;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.18s;
+    }
+    .radio-item input:checked ~ .radio-dot { border-color: var(--moss); }
+    .radio-item input:checked ~ .radio-dot::after {
+      content: ''; width: 6px; height: 6px;
+      border-radius: 50%; background: var(--moss); display: block;
+    }
+    .radio-item input:checked ~ .radio-label { color: var(--ink); }
+    .radio-label { font-size: 0.78rem; color: var(--ink-mid); }
+
+    /* Upload */
+    .upload-zone {
+      border: 1.5px dashed var(--border-mid);
+      border-radius: 3px;
+      padding: 2.5rem;
       text-align: center;
+      background: #fff;
+      cursor: none;
+      transition: all 0.2s;
+      position: relative;
     }
-    .metric-label {
-      font-size: 0.58rem; color: var(--ink-muted);
-      letter-spacing: 0.1em; text-transform: uppercase;
-      margin-bottom: 0.4rem; font-weight: 500;
+    .upload-zone:hover, .upload-zone.drag-over {
+      border-color: var(--moss);
+      background: var(--mint-wash);
     }
-    .metric-value {
+    .upload-zone input { position: absolute; inset: 0; opacity: 0; cursor: none; }
+    .upload-icon { font-size: 1.6rem; margin-bottom: 0.8rem; opacity: 0.4; }
+    .upload-main { font-size: 0.85rem; color: var(--ink-mid); margin-bottom: 0.3rem; font-weight: 400; }
+    .upload-main span { color: var(--moss); text-decoration: underline; text-underline-offset: 2px; }
+    .upload-sub { font-size: 0.7rem; color: var(--ink-faint); letter-spacing: 0.04em; }
+    .upload-name {
+      display: none; font-size: 0.78rem; color: var(--moss);
+      margin-top: 0.8rem; font-weight: 500;
+    }
+
+    /* Submit */
+    .submit-wrap {
+      padding-top: 2.5rem;
+      border-top: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 2rem; flex-wrap: wrap;
+    }
+    .submit-note { font-size: 0.75rem; color: var(--ink-muted); line-height: 1.6; max-width: 340px; }
+    .btn-submit {
+      display: inline-flex; align-items: center; gap: 0.7rem;
+      background: var(--forest); color: var(--bg);
+      padding: 0.85rem 2rem; border-radius: 2px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.82rem; font-weight: 500;
+      letter-spacing: 0.04em; border: none;
+      cursor: none; transition: all 0.22s;
+      white-space: nowrap;
+    }
+    .btn-submit:hover { background: var(--canopy); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(28,46,28,0.18); }
+    .btn-submit .arrow { transition: transform 0.18s; }
+    .btn-submit:hover .arrow { transform: translateX(4px); }
+
+    /* Loading overlay */
+    .loading-overlay {
+      display: none; position: fixed; inset: 0; z-index: 200;
+      background: rgba(240,236,227,0.92);
+      backdrop-filter: blur(12px);
+      flex-direction: column; align-items: center; justify-content: center;
+      gap: 1.5rem;
+    }
+    .loading-overlay.active { display: flex; }
+    .loading-spinner {
+      width: 32px; height: 32px;
+      border: 1.5px solid var(--border-mid);
+      border-top-color: var(--moss);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-title {
       font-family: var(--display);
       font-size: 1.6rem; font-weight: 700;
       color: var(--ink); letter-spacing: -0.02em;
     }
-    .metric-value.green { color: var(--moss); }
-    .metric-value.amber { color: var(--brown-mid); }
-    .metric-value.red   { color: var(--red); }
+    .loading-sub { font-size: 0.78rem; color: var(--ink-muted); }
 
-    /* Findings */
-    .findings-section { border-top: 3px solid var(--red); }
-    .finding-card {
-      border-left: 2px solid;
-      padding: 1rem 1.2rem;
-      margin-bottom: 0.7rem;
-      border-radius: 0 2px 2px 0;
-    }
-    .finding-card.red   { border-color: var(--red);   background: rgba(144,64,64,0.05); }
-    .finding-card.amber { border-color: var(--amber); background: rgba(138,96,48,0.05); }
-    .finding-card.green { border-color: var(--moss);  background: rgba(78,116,80,0.05); }
-    .finding-header {
-      display: flex; justify-content: space-between;
-      align-items: flex-start; gap: 1rem;
-      margin-bottom: 0.6rem; flex-wrap: wrap;
-    }
-    .finding-title { font-size: 0.88rem; font-weight: 500; color: var(--ink); }
-    .finding-amount {
-      font-size: 0.85rem; font-weight: 600;
-      color: var(--red); white-space: nowrap; flex-shrink: 0;
-    }
-    .finding-card.green .finding-amount { color: var(--moss); }
-    .finding-card.amber .finding-amount { color: var(--brown-mid); }
-    .finding-body {
-      font-size: 0.8rem; color: var(--ink-muted);
-      line-height: 1.7;
-    }
-    .finding-body strong { color: var(--ink-mid); font-weight: 500; }
-
-    /* Lists */
-    .savings-list, .diversion-list, .contract-list, .action-list {
-      padding-left: 1.1rem; margin: 0;
-    }
-    .savings-list li, .diversion-list li, .contract-list li, .action-list li {
-      font-size: 0.82rem; color: var(--ink-mid);
-      line-height: 1.75; margin-bottom: 0.8rem;
-      padding-left: 0.3rem;
-    }
-    .action-impact {
-      font-size: 0.75rem; color: var(--moss);
-      font-weight: 500;
-    }
-    .action-intro { font-size: 0.78rem; color: var(--ink-muted); margin-bottom: 0.8rem; }
-    .action-plan { border-top: 3px solid var(--brown-mid); }
-
-    .audit-section p {
-      font-size: 0.84rem; color: var(--ink-mid);
-      line-height: 1.8; margin-bottom: 0.8rem;
-    }
-    .audit-section ul, .audit-section ol {
-      padding-left: 1.2rem; margin-bottom: 0.8rem;
-    }
-    .audit-section li {
-      font-size: 0.82rem; color: var(--ink-mid);
-      line-height: 1.7; margin-bottom: 0.4rem;
-    }
-    .audit-section strong { color: var(--ink); font-weight: 500; }
-    .green { color: var(--moss); }
-    .red   { color: var(--red); }
-
-    /* Bottom actions */
-    .bottom-actions {
-      display: flex; gap: 0.8rem; justify-content: flex-start;
-      margin-top: 2rem; flex-wrap: wrap;
-      padding-top: 2rem; border-top: 1px solid var(--border);
-    }
-    .action-btn {
-      display: inline-flex; align-items: center; gap: 0.5rem;
-      padding: 0.75rem 1.6rem; border-radius: 2px;
-      font-size: 0.78rem; font-weight: 500;
-      text-decoration: none; border: none; cursor: none;
-      transition: all 0.22s; font-family: 'Inter', sans-serif;
-      letter-spacing: 0.03em;
-    }
-    .action-btn.primary { background: var(--forest); color: var(--bg); }
-    .action-btn.primary:hover { background: var(--canopy); transform: translateY(-1px); }
-    .action-btn.secondary { background: #fff; color: var(--ink); border: 1px solid var(--border-mid); }
-    .action-btn.secondary:hover { border-color: var(--moss); color: var(--pine); }
-
-    @media print {
-      nav, .bottom-actions { display: none; }
-      .report-body { padding-top: 1rem; }
-      .audit-section { box-shadow: none; break-inside: avoid; }
-    }
-    @media(max-width:640px) {
-      .metrics-row { grid-template-columns: 1fr 1fr; }
+    @media(max-width:640px){
+      .form-grid { grid-template-columns: 1fr; }
+      .checkbox-grid { grid-template-columns: 1fr 1fr; }
+      .submit-wrap { flex-direction: column; align-items: flex-start; }
+      .btn-submit { width: 100%; justify-content: center; }
     }
   </style>
 </head>
@@ -245,37 +299,233 @@
 
 <nav>
   <a href="/" class="nav-logo">Scrapper</a>
-  <div class="nav-actions">
-    <button class="nav-btn" onclick="window.print()">Print Report</button>
-    <a href="/audit" class="nav-btn primary">+ New Audit</a>
-  </div>
+  <a href="/" class="nav-back">← Back to home</a>
 </nav>
 
-<div class="report-header">
-  <div class="report-eyebrow">Audit Report</div>
-  <h1><em>{{ business_name }}</em></h1>
-  <div class="report-meta">Generated by Scrapper · Powered by Claude Opus 4.6</div>
+<div class="loading-overlay" id="loading">
+  <div class="loading-spinner"></div>
+  <div class="loading-title">Analyzing your waste program.</div>
+  <div class="loading-sub">This usually takes 20–40 seconds.</div>
 </div>
 
-<div class="report-body">
-  {{ audit_html | safe }}
-
-  <div class="bottom-actions">
-    <button class="action-btn primary" onclick="window.print()">Print / Save PDF</button>
-    <a href="/audit" class="action-btn secondary">New Audit</a>
-    <a href="/" class="action-btn secondary">← Home</a>
+<div class="page-wrap">
+  <div class="page-header">
+    <div class="page-eyebrow">Free Audit</div>
+    <h1>Tell us about your operation.</h1>
+    <p>The more detail you provide, the more precise your audit. Most forms take under three minutes to complete.</p>
   </div>
+
+  <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+
+  <form action="/submit" method="POST" enctype="multipart/form-data" id="audit-form">
+
+    <!-- BUSINESS INFO -->
+    <div class="form-section">
+      <div class="form-section-label">Business Information</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Business Name</label>
+          <input type="text" name="business_name" placeholder="e.g. Blue Sparrow Café" required />
+        </div>
+        <div class="field">
+          <label>Business Type</label>
+          <select name="business_type">
+            <option value="" disabled selected>Select type</option>
+            <option>Restaurant / Café</option>
+            <option>Retail Store</option>
+            <option>Office / Professional Services</option>
+            <option>Hotel / Hospitality</option>
+            <option>Grocery / Food Market</option>
+            <option>Healthcare / Medical</option>
+            <option>Manufacturing</option>
+            <option>Warehouse / Distribution</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>City & State</label>
+          <input type="text" name="location" placeholder="e.g. Portland, OR" required />
+        </div>
+        <div class="field">
+          <label>Number of Employees</label>
+          <select name="employees">
+            <option value="" disabled selected>Select range</option>
+            <option>1–5</option>
+            <option>6–20</option>
+            <option>21–50</option>
+            <option>51–100</option>
+            <option>100+</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- WASTE STREAMS -->
+    <div class="form-section">
+      <div class="form-section-label">Waste Streams Produced</div>
+      <div class="checkbox-grid">
+        <label class="check-item"><input type="checkbox" name="waste_streams" value="General Trash"/><span class="check-box"></span><span class="check-label">General Trash</span></label>
+        <label class="check-item"><input type="checkbox" name="waste_streams" value="Cardboard"/><span class="check-box"></span><span class="check-label">Cardboard</span></label>
+        <label class="check-item"><input type="checkbox" name="waste_streams" value="Food Waste"/><span class="check-box"></span><span class="check-label">Food Waste</span></label>
+        <label class="check-item"><input type="checkbox" name="waste_streams" value="Glass"/><span class="check-box"></span><span class="check-label">Glass</span></label>
+        <label class="check-item"><input type="checkbox" name="waste_streams" value="Plastics"/><span class="check-box"></span><span class="check-label">Plastics</span></label>
+        <label class="check-item"><input type="checkbox" name="waste_streams" value="Metals"/><span class="check-box"></span><span class="check-label">Metals</span></label>
+        <label class="check-item"><input type="checkbox" name="waste_streams" value="Cooking Oil"/><span class="check-box"></span><span class="check-label">Cooking Oil</span></label>
+        <label class="check-item"><input type="checkbox" name="waste_streams" value="Hazardous"/><span class="check-box"></span><span class="check-label">Hazardous</span></label>
+        <label class="check-item"><input type="checkbox" name="waste_streams" value="E-Waste"/><span class="check-box"></span><span class="check-label">E-Waste</span></label>
+      </div>
+    </div>
+
+    <!-- SERVICE DETAILS -->
+    <div class="form-section">
+      <div class="form-section-label">Current Waste Service</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Waste Hauler Name</label>
+          <input type="text" name="waste_hauler" placeholder="e.g. Republic Services" />
+        </div>
+        <div class="field">
+          <label>Contract End / Renewal Date</label>
+          <input type="text" name="contract_end_date" placeholder="e.g. December 2024" />
+        </div>
+        <div class="field">
+          <label>Approx. Monthly Spend ($)</label>
+          <input type="number" name="monthly_spend" placeholder="e.g. 450" />
+        </div>
+        <div class="field">
+          <label>Primary Container Size</label>
+          <select name="container_size">
+            <option value="" disabled selected>Select size</option>
+            <option>32-gallon cart</option>
+            <option>64-gallon cart</option>
+            <option>96-gallon cart</option>
+            <option>2-yard dumpster</option>
+            <option>4-yard dumpster</option>
+            <option>6-yard dumpster</option>
+            <option>8-yard dumpster</option>
+            <option>Compactor</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Pickup Frequency</label>
+          <select name="pickup_frequency">
+            <option value="" disabled selected>Select frequency</option>
+            <option>1x per week</option>
+            <option>2x per week</option>
+            <option>3x per week</option>
+            <option>4x per week</option>
+            <option>5x per week</option>
+            <option>On-demand</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROGRAMS -->
+    <div class="form-section">
+      <div class="form-section-label">Current Programs</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Recycling Program</label>
+          <div class="radio-row">
+            <label class="radio-item"><input type="radio" name="recycling_program" value="Yes" /><span class="radio-dot"></span><span class="radio-label">Yes</span></label>
+            <label class="radio-item"><input type="radio" name="recycling_program" value="No" /><span class="radio-dot"></span><span class="radio-label">No</span></label>
+            <label class="radio-item"><input type="radio" name="recycling_program" value="Not sure" /><span class="radio-dot"></span><span class="radio-label">Not sure</span></label>
+          </div>
+        </div>
+        <div class="field">
+          <label>Organics / Composting Program</label>
+          <div class="radio-row">
+            <label class="radio-item"><input type="radio" name="organics_program" value="Yes" /><span class="radio-dot"></span><span class="radio-label">Yes</span></label>
+            <label class="radio-item"><input type="radio" name="organics_program" value="No" /><span class="radio-dot"></span><span class="radio-label">No</span></label>
+            <label class="radio-item"><input type="radio" name="organics_program" value="Not sure" /><span class="radio-dot"></span><span class="radio-label">Not sure</span></label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INVOICE UPLOAD -->
+    <div class="form-section">
+      <div class="form-section-label">Invoice Upload</div>
+      <div class="upload-zone" id="upload-zone">
+        <input type="file" name="invoice" id="invoice-input" accept=".pdf,.jpg,.jpeg,.png,.csv,.xlsx" />
+        <div class="upload-icon">📄</div>
+        <div class="upload-main"><span>Choose a file</span> or drag and drop</div>
+        <div class="upload-sub">PDF, JPG, PNG, CSV, XLSX · Max 10MB</div>
+        <div class="upload-name" id="upload-name"></div>
+      </div>
+    </div>
+
+    <!-- NOTES -->
+    <div class="form-section">
+      <div class="form-section-label">Additional Notes</div>
+      <div class="form-grid full">
+        <div class="field">
+          <label>Anything else we should know?</label>
+          <textarea name="additional_notes" placeholder="Specific concerns, context about your operation, things you've noticed on past invoices..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="submit-wrap">
+      <p class="submit-note">Your data is used only to generate your audit. We don't store or share your invoice. Results in under 5 minutes.</p>
+      <button type="submit" class="btn-submit">Run My Audit <span class="arrow">→</span></button>
+    </div>
+
+  </form>
 </div>
 
 <script>
+  // Cursor
   const cursor=document.getElementById('cursor');
   const ring=document.getElementById('cursor-ring');
   let mx=0,my=0,rx=0,ry=0;
   document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx+'px';cursor.style.top=my+'px';});
   (function tick(){rx+=(mx-rx)*0.09;ry+=(my-ry)*0.09;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(tick);})();
-  document.querySelectorAll('a,button').forEach(el=>{
+  document.querySelectorAll('a,button,label,select,input,textarea').forEach(el=>{
     el.addEventListener('mouseenter',()=>cursor.classList.add('big'));
     el.addEventListener('mouseleave',()=>cursor.classList.remove('big'));
+  });
+
+  // Progress bar
+  const fields = document.querySelectorAll('input,select,textarea');
+  const progress = document.getElementById('progress');
+  function updateProgress() {
+    let filled = 0;
+    fields.forEach(f => {
+      if (f.type === 'checkbox' || f.type === 'radio') { if (f.checked) filled++; }
+      else if (f.value.trim()) filled++;
+    });
+    const pct = Math.min(100, Math.round((filled / 12) * 100));
+    progress.style.width = pct + '%';
+  }
+  fields.forEach(f => f.addEventListener('change', updateProgress));
+  fields.forEach(f => f.addEventListener('input', updateProgress));
+
+  // File upload
+  const zone = document.getElementById('upload-zone');
+  const input = document.getElementById('invoice-input');
+  const nameEl = document.getElementById('upload-name');
+  input.addEventListener('change', () => {
+    if (input.files[0]) {
+      nameEl.textContent = '✓ ' + input.files[0].name;
+      nameEl.style.display = 'block';
+    }
+  });
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault(); zone.classList.remove('drag-over');
+    if (e.dataTransfer.files[0]) {
+      input.files = e.dataTransfer.files;
+      nameEl.textContent = '✓ ' + e.dataTransfer.files[0].name;
+      nameEl.style.display = 'block';
+    }
+  });
+
+  // Show loading on submit
+  document.getElementById('audit-form').addEventListener('submit', () => {
+    document.getElementById('loading').classList.add('active');
   });
 </script>
 </body>
