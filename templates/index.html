@@ -1,748 +1,1038 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Scrapper — Waste Audit Intelligence</title>
+  <title>WasteHound — The waste audit platform for small business</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,700;1,800;1,900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      /* Base */
-      --bg:          #f0ece3;
-      --bg-warm:     #e8e2d6;
-      --bg-section:  #ede8df;
-      --bg-alt:      #e2ddd3;
-
-      /* Text */
-      --ink:         #1a1a14;
-      --ink-mid:     #3a3a2e;
-      --ink-muted:   #7a7a68;
-      --ink-faint:   #aeae98;
-
-      /* Forest greens */
-      --forest:      #1c2e1c;
-      --canopy:      #2a4430;
-      --pine:        #3a5c3a;
-      --moss:        #4e7450;
-      --sage:        #6b9060;
-      --sage-light:  #90b882;
-      --pale-sage:   #c8dcc0;
-      --mint-wash:   #e4efe0;
-
-      /* Browns */
-      --bark:        #2c1e10;
-      --umber:       #4a3020;
-      --brown-mid:   #6e5038;
-      --tan:         #9a7a58;
-      --sand:        #c8ae90;
-      --parchment:   #e0ceb0;
-      --parchment-lt:#ede0c8;
-
-      /* Borders */
-      --border:      rgba(26,26,20,0.1);
-      --border-mid:  rgba(26,26,20,0.15);
-      --border-dark: rgba(26,26,20,0.22);
-    }
-
     html { scroll-behavior: smooth; }
 
+    :root {
+      /* Forest green — dark, earthy */
+      --forest:     #1a2e18;
+      --forest-mid: #243d21;
+      --forest-lt:  #2e4e2a;
+      --forest-pale:#dfe8db;
+      --forest-wash:#edf0eb;
+
+      /* Mocha */
+      --mocha:      #7a5c3e;
+      --mocha-mid:  #9c7a58;
+      --mocha-lt:   #c4a882;
+      --mocha-pale: #f2ebe0;
+      --mocha-wash: #faf6f0;
+
+      /* Neutrals */
+      --ink:        #1a1a18;
+      --ink-mid:    #3d3d38;
+      --ink-muted:  #7a7870;
+      --ink-faint:  #b8b5ae;
+      --white:      #ffffff;
+      --off-white:  #fafaf7;
+      --border:     rgba(26,26,24,.08);
+      --border-mid: rgba(26,26,24,.13);
+    }
+
     body {
-      font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-      --display: 'Playfair Display', Georgia, serif;
-      background: var(--bg);
+      font-family: 'DM Sans', sans-serif;
+      background: var(--off-white);
       color: var(--ink);
-      overflow-x: hidden;
-      cursor: none;
       -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
     }
 
-    /* ── CURSOR ── */
-    #cursor {
-      position: fixed; pointer-events: none; z-index: 9999;
-      width: 6px; height: 6px;
-      background: var(--ink);
-      border-radius: 50%;
-      transform: translate(-50%,-50%);
-      transition: width 0.18s, height 0.18s;
-    }
-    #cursor.big {
-      width: 36px; height: 36px;
-      background: transparent;
-      border: 1px solid rgba(26,26,20,0.3);
-    }
-    #cursor-ring {
-      position: fixed; pointer-events: none; z-index: 9998;
-      width: 28px; height: 28px;
-      border: 1px solid rgba(26,26,20,0.12);
-      border-radius: 50%;
-      transform: translate(-50%,-50%);
-    }
-
-    /* ── NAV ── */
+    /* ─── NAV ─── */
     nav {
-      position: fixed; top: 0; width: 100%; z-index: 100;
-      padding: 0 4%;
-      height: 52px;
+      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+      height: 64px;
       display: flex; align-items: center; justify-content: space-between;
-      background: rgba(240,236,227,0.92);
-      backdrop-filter: blur(16px);
+      padding: 0 3rem;
+      background: rgba(250,250,247,.92);
+      backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border);
+      transition: box-shadow .3s;
     }
+    nav.scrolled { box-shadow: 0 2px 24px rgba(26,26,24,.07); }
+
     .nav-logo {
-      font-family: var(--display);
-      font-size: 0.78rem; font-weight: 700;
-      color: var(--ink); text-decoration: none;
-       
+      display: flex; align-items: center; gap: 9px;
+      text-decoration: none;
+      font-family: 'Lora', serif;
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--forest);
+      letter-spacing: -.01em;
     }
+
     .nav-center {
-      display: flex; gap: 0;
-      position: absolute; left: 50%; transform: translateX(-50%);
+      display: flex; align-items: center; gap: 2.5rem;
     }
-    .nav-item {
-      display: flex; align-items: center; gap: 0.5rem;
-      padding: 0 1.4rem; height: 52px;
-      font-size: 0.72rem; color: var(--ink-muted);
-      text-decoration: none; letter-spacing: 0.04em;
-      border-right: 1px solid var(--border);
-      transition: color 0.2s;
+    .nav-link {
+      font-size: .85rem; font-weight: 500;
+      color: var(--ink-muted); text-decoration: none;
+      transition: color .18s;
     }
-    .nav-item:first-child { border-left: 1px solid var(--border); }
-    .nav-item:hover { color: var(--ink); }
-    .nav-item-num { font-size: 0.6rem; color: var(--ink-faint); }
+    .nav-link:hover { color: var(--ink); }
+
     .nav-right { display: flex; align-items: center; gap: 1rem; }
-    .nav-cta {
-      font-size: 0.72rem; font-weight: 500;
-      color: var(--bg); background: var(--forest);
-      padding: 0.42rem 1.1rem; border-radius: 2px;
-      text-decoration: none; letter-spacing: 0.04em;
-      transition: all 0.2s;
+    .btn-ghost-sm {
+      font-size: .82rem; font-weight: 500;
+      color: var(--ink-mid); text-decoration: none;
+      transition: color .18s;
     }
-    .nav-cta:hover { background: var(--canopy); }
-    .nav-menu {
-      width: 28px; display: flex; flex-direction: column;
-      gap: 5px; cursor: none; padding: 4px 0;
+    .btn-ghost-sm:hover { color: var(--ink); }
+    .btn-solid-sm {
+      font-size: .82rem; font-weight: 600;
+      color: var(--white); background: var(--forest);
+      padding: .5rem 1.2rem; border-radius: 8px;
+      text-decoration: none; transition: background .18s, transform .18s;
     }
-    .nav-menu span { display: block; height: 1px; background: var(--ink); width: 100%; }
-    .nav-menu span:last-child { width: 60%; }
+    .btn-solid-sm:hover { background: var(--forest-mid); transform: translateY(-1px); }
 
-    /* ── HERO ── */
+    /* ─── HERO ─── */
     .hero {
-      padding: 52px 4% 0;
-      min-height: 100vh;
-      display: flex; flex-direction: column;
-      background: var(--bg);
-    }
-
-    .hero-top {
-      padding: 3.5rem 0 2.5rem;
-      display: flex; align-items: flex-start;
-      justify-content: space-between; gap: 4rem;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .hero-headline {
-      font-family: var(--display);
-      font-size: clamp(3.2rem, 6.5vw, 6.8rem);
-      font-weight: 800;
-      line-height: 1.02;
-      letter-spacing: -0.03em;
-      color: var(--ink);
-      max-width: 680px;
-      flex-shrink: 0;
-    }
-
-    .hero-top-right {
-      max-width: 320px;
-      padding-top: 0.5rem;
-      flex-shrink: 0;
-    }
-    .hero-top-right p {
-      font-size: 0.83rem; color: var(--ink-muted);
-      line-height: 1.75; font-weight: 300;
-      margin-bottom: 2rem;
-    }
-    .btn-hero {
-      display: inline-flex; align-items: center; gap: 0.6rem;
-      background: var(--forest); color: var(--bg);
-      padding: 0.7rem 1.6rem; border-radius: 2px;
-      font-size: 0.78rem; font-weight: 500;
-      letter-spacing: 0.04em;
-      text-decoration: none; border: none; cursor: none;
-      transition: all 0.22s;
-    }
-    .btn-hero:hover { background: var(--canopy); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(28,46,28,0.18); }
-    .btn-arrow { transition: transform 0.18s; }
-    .btn-hero:hover .btn-arrow { transform: translateX(4px); }
-
-    /* ── HERO IMAGE ── */
-    .hero-image-wrap {
-      flex: 1;
+      padding-top: 64px;
       position: relative;
-      margin: 0 -4%;
-      height: 55vh;
-      min-height: 320px;
       overflow: hidden;
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-    }
-    .hero-img {
-      width: 100%; height: 100%;
-      object-fit: cover; object-position: center bottom;
-      display: block;
-      filter: brightness(0.88) contrast(1.05) saturate(0.85);
-    }
-    .hero-img-placeholder {
-      width: 100%; height: 100%;
-      background: linear-gradient(135deg, var(--canopy) 0%, var(--umber) 55%, var(--pine) 100%);
-      display: flex; align-items: center; justify-content: center;
-      flex-direction: column; gap: 1rem;
-    }
-    .placeholder-label {
-      font-size: 0.65rem; letter-spacing: 0.2em;
-      text-transform: uppercase; color: rgba(255,255,255,0.3);
-    }
-    .placeholder-icon { font-size: 2rem; opacity: 0.2; }
-    .hero-image-overlay {
-      position: absolute; bottom: 0; left: 0; right: 0;
-      padding: 1.8rem 4%;
-      background: linear-gradient(to top, rgba(30,20,10,0.45) 0%, transparent 100%);
-      display: flex; align-items: flex-end; justify-content: space-between;
-    }
-    .hero-image-caption {
-      font-size: 0.62rem; color: rgba(255,255,255,0.45);
-      letter-spacing: 0.12em; text-transform: uppercase;
-    }
-    .hero-image-tag {
-      font-size: 0.62rem; color: rgba(255,255,255,0.3); letter-spacing: 0.1em;
+      min-height: 92vh;
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: flex-end;
+      text-align: center;
     }
 
-    /* ── STAT BAR ── */
-    .stat-bar {
-      display: grid; grid-template-columns: repeat(4,1fr);
-      border-bottom: 1px solid var(--border);
-      background: var(--parchment-lt);
-    }
-    .stat-cell {
-      padding: 1.6rem 0 1.6rem 4%;
-      border-right: 1px solid var(--border);
-    }
-    .stat-cell:last-child { border-right: none; }
-    .stat-num {
-      font-size: 1.9rem; font-weight: 300;
-      color: var(--ink); line-height: 1;
-      letter-spacing: -0.02em; margin-bottom: 0.3rem;
-    }
-    .stat-label {
-      font-size: 0.6rem; color: var(--ink-muted);
-      letter-spacing: 0.1em; text-transform: uppercase;
+    /* Dithered / gradient mountain-style background — Watershed signature */
+    .hero-bg {
+      position: absolute; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse 120% 80% at 50% 0%,   #1a2e18 0%,  #243d21 25%, #3a5e2e 50%, #6a8a52 68%, #b8a888 82%, #f2ebe0 100%);
     }
 
-    /* ── SHARED SECTION ── */
-    .section { padding: 5rem 4%; border-bottom: 1px solid var(--border); }
-    .section-tag {
-      font-size: 0.62rem; letter-spacing: 0.18em;
-      text-transform: uppercase; color: var(--ink-muted);
-      display: flex; align-items: center; gap: 0.7rem;
-      margin-bottom: 3rem;
+    /* SVG noise/dither overlay */
+    .hero-bg::after {
+      content: '';
+      position: absolute; inset: 0;
+      opacity: .18;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 200px;
+      mix-blend-mode: overlay;
     }
-    .section-tag::before { content:''; width:16px; height:1px; background:currentColor; }
 
-    /* ── HOW IT WORKS — forest green bg ── */
-    .how-section {
-      background: var(--forest);
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-    }
-    .how-section .section-tag { color: rgba(255,255,255,0.35); }
-    .how-section .section-tag::before { background: rgba(255,255,255,0.35); }
-
-    .how-grid {
-      display: grid; grid-template-columns: repeat(3,1fr);
-      gap: 0; border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 2px; overflow: hidden;
-    }
-    .how-cell {
-      padding: 2.2rem 2rem;
-      border-right: 1px solid rgba(255,255,255,0.07);
-      position: relative; overflow: hidden;
-      transition: background 0.3s;
-    }
-    .how-cell:last-child { border-right: none; }
-    .how-cell:hover { background: rgba(255,255,255,0.04); }
-    .how-step {
-      font-size: 0.58rem; color: rgba(255,255,255,0.28);
-      letter-spacing: 0.15em; text-transform: uppercase;
+    .hero-eyebrow {
+      position: relative; z-index: 2;
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.2);
+      border-radius: 100px;
+      padding: .35rem 1rem;
+      font-size: .72rem; font-weight: 600;
+      letter-spacing: .1em; text-transform: uppercase;
+      color: rgba(255,255,255,.75);
       margin-bottom: 1.8rem;
+      backdrop-filter: blur(8px);
     }
-    .how-cell h3 {
-      font-family: var(--display);
-      font-size: 1.05rem; font-weight: 700;
-      color: #fff; margin-bottom: 0.8rem;
-      line-height: 1.3; letter-spacing: -0.01em;
+    .hero-eyebrow .pulse {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #7dda58;
+      animation: pulse 2s ease infinite;
     }
-    .how-cell p {
-      font-size: 0.8rem; color: rgba(255,255,255,0.45);
-      line-height: 1.8; font-weight: 300;
-    }
-    .how-bg-num {
-      position: absolute; bottom: -1rem; right: 1rem;
-      font-size: 8rem; font-weight: 300;
-      color: rgba(255,255,255,0.03); line-height: 1;
-      pointer-events: none; letter-spacing: -0.03em;
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.8)} }
+
+    .hero-content {
+      position: relative; z-index: 2;
+      padding: 5rem 2rem 0;
+      max-width: 820px;
+      margin: 0 auto;
     }
 
-    /* ── FEATURES — warm parchment bg ── */
-    .features-section {
-      background: var(--parchment-lt);
-      border-bottom: 1px solid var(--border);
-      padding: 5rem 4%;
+    .hero h1 {
+      font-family: 'Lora', serif;
+      font-size: clamp(2.6rem, 5.5vw, 5rem);
+      font-weight: 500;
+      line-height: 1.1;
+      letter-spacing: -.02em;
+      color: #fff;
+      margin-bottom: 1.4rem;
     }
-    .features-layout {
-      display: grid; grid-template-columns: 4fr 6fr;
-      gap: 6rem; align-items: start;
+    .hero h1 em {
+      font-style: italic;
+      color: rgba(255,255,255,.7);
     }
-    .features-left h2 {
-      font-family: var(--display);
-      font-size: clamp(1.8rem, 3vw, 2.8rem);
-      font-weight: 700; line-height: 1.2;
-      color: var(--ink); margin-bottom: 1.5rem;
-      letter-spacing: -0.02em;
+
+    .hero-sub {
+      font-size: 1.05rem; font-weight: 300;
+      line-height: 1.7;
+      color: rgba(255,255,255,.65);
+      max-width: 520px;
+      margin: 0 auto 2.2rem;
     }
-    .features-left p {
-      font-size: 0.82rem; color: var(--ink-muted);
-      line-height: 1.85; font-weight: 300;
+
+    .hero-actions {
+      display: flex; align-items: center; justify-content: center;
+      gap: 1rem; margin-bottom: 3rem; flex-wrap: wrap;
     }
-    .feature-list { list-style: none; }
-    .feature-item {
-      display: flex; gap: 1.2rem; padding: 1.2rem 0;
-      border-bottom: 1px solid var(--border);
-      transition: padding-left 0.25s;
+
+    .btn-hero-primary {
+      font-family: 'DM Sans', sans-serif;
+      font-size: .9rem; font-weight: 600;
+      color: var(--forest);
+      background: #fff;
+      padding: .85rem 2rem; border-radius: 10px;
+      text-decoration: none;
+      display: inline-flex; align-items: center; gap: 6px;
+      transition: all .22s;
+      box-shadow: 0 4px 20px rgba(0,0,0,.15);
     }
-    .feature-item:first-child { border-top: 1px solid var(--border); }
-    .feature-item:hover { padding-left: 0.4rem; }
-    .feature-num {
-      font-size: 0.6rem; color: var(--tan);
-      letter-spacing: 0.08em; padding-top: 3px;
+    .btn-hero-primary:hover { background: var(--mocha-wash); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,.2); }
+    .btn-hero-primary .arr { transition: transform .18s; }
+    .btn-hero-primary:hover .arr { transform: translateX(3px); }
+
+    .btn-hero-ghost {
+      font-size: .88rem; font-weight: 500;
+      color: rgba(255,255,255,.65);
+      text-decoration: none;
+      display: inline-flex; align-items: center; gap: 5px;
+      transition: color .18s;
+    }
+    .btn-hero-ghost:hover { color: #fff; }
+
+    /* Screenshot card sitting at bottom of hero, bleeding into next section */
+    .hero-screenshot-wrap {
+      position: relative; z-index: 2;
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      transform: translateY(52px);
+    }
+
+    .hero-screenshot {
+      width: 100%;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 2px 4px rgba(26,26,24,.04), 0 24px 80px rgba(26,26,24,.18), 0 4px 16px rgba(26,26,24,.08);
+      overflow: hidden;
+      border: 1px solid rgba(26,26,24,.07);
+    }
+
+    /* Mock report UI inside screenshot */
+    .screenshot-topbar {
+      background: var(--forest);
+      padding: .8rem 1.4rem;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .screenshot-topbar-left {
+      display: flex; align-items: center; gap: 8px;
+    }
+    .topbar-dot { width:10px; height:10px; border-radius:50%; }
+    .topbar-dot.r { background:#ff5f57; }
+    .topbar-dot.y { background:#ffbd2e; }
+    .topbar-dot.g { background:#28ca41; }
+    .topbar-title {
+      font-size: .72rem; font-weight: 600;
+      color: rgba(255,255,255,.45);
+      letter-spacing: .06em; text-transform: uppercase;
+      margin-left: .5rem;
+    }
+    .topbar-badge {
+      font-size: .65rem; font-weight: 600;
+      letter-spacing: .1em; text-transform: uppercase;
+      color: rgba(255,255,255,.35);
+      border: 1px solid rgba(255,255,255,.15);
+      padding: .2rem .6rem; border-radius: 4px;
+    }
+
+    .screenshot-body {
+      padding: 1.5rem;
+      background: #f8f8f5;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .ss-metric {
+      background: #fff;
+      border: 1px solid rgba(26,26,24,.07);
+      border-radius: 10px;
+      padding: 1rem;
+      grid-column: span 2;
+      text-align: center;
+    }
+    .ss-metric-label {
+      font-size: .58rem; font-weight: 600;
+      letter-spacing: .1em; text-transform: uppercase;
+      color: var(--ink-faint);
+      margin-bottom: .4rem;
+    }
+    .ss-metric-value {
+      font-family: 'Lora', serif;
+      font-size: 1.8rem; font-weight: 500;
+      letter-spacing: -.02em;
+      line-height: 1;
+    }
+    .ss-metric-value.green { color: var(--forest-lt); }
+    .ss-metric-value.amber { color: var(--mocha); }
+    .ss-metric-value.red { color: #b84040; }
+
+    .ss-finding-list {
+      grid-column: 1 / 5;
+      display: flex; flex-direction: column; gap: .5rem;
+    }
+    .ss-finding {
+      background: #fff;
+      border: 1px solid rgba(26,26,24,.07);
+      border-radius: 8px;
+      padding: .7rem 1rem;
+      display: flex; align-items: center; gap: .8rem;
+    }
+    .ss-finding-bar {
+      width: 3px; border-radius: 2px; align-self: stretch;
       flex-shrink: 0;
     }
-    .feature-text h4 {
-      font-size: 0.85rem; font-weight: 500;
-      color: var(--ink); margin-bottom: 0.25rem;
-      letter-spacing: -0.01em;
-    }
-    .feature-text p {
-      font-size: 0.78rem; color: var(--ink-muted);
-      line-height: 1.65; font-weight: 300;
-    }
+    .ss-finding-bar.red { background: #b84040; }
+    .ss-finding-bar.amber { background: var(--mocha); }
+    .ss-finding-bar.green { background: var(--forest-lt); }
+    .ss-finding-text { font-size: .72rem; font-weight: 500; color: var(--ink-mid); flex: 1; }
+    .ss-finding-amt { font-size: .72rem; font-weight: 700; flex-shrink: 0; }
+    .ss-finding-amt.red { color: #b84040; }
+    .ss-finding-amt.green { color: var(--forest-lt); }
+    .ss-finding-amt.amber { color: var(--mocha); }
 
-    /* ── STATEMENT — brown/umber bg ── */
-    .statement-section {
-      padding: 6rem 4%;
-      background: var(--umber);
-      border-bottom: 1px solid rgba(255,255,255,0.06);
+    .ss-action-list {
+      grid-column: 5 / 7;
+      display: flex; flex-direction: column; gap: .5rem;
     }
-    .statement-label {
-      font-size: 0.62rem; color: rgba(255,255,255,0.3);
-      letter-spacing: 0.18em; text-transform: uppercase;
-      display: flex; align-items: center; gap: 0.7rem;
-      margin-bottom: 2.5rem;
-    }
-    .statement-label::before { content:''; width:16px; height:1px; background:currentColor; }
-    .statement-inner { max-width: 820px; }
-    .statement-text {
-      font-family: var(--display);
-      font-size: clamp(1.6rem, 3.5vw, 3rem);
-      font-weight: 700; line-height: 1.28;
-      color: var(--parchment); letter-spacing: -0.02em;
-    }
-    .statement-text strong { font-weight: 400; color: #fff; }
-    .statement-source {
-      font-size: 0.62rem; color: rgba(255,255,255,0.25);
-      letter-spacing: 0.1em; text-transform: uppercase;
-      margin-top: 2.5rem;
-    }
-
-    /* ── SAMPLE REPORT — light sage wash ── */
-    .report-section {
-      background: var(--mint-wash);
-      padding: 5rem 4%;
-      border-bottom: 1px solid var(--border);
-    }
-    .report-layout {
-      display: grid; grid-template-columns: 1fr 1.6fr;
-      gap: 5rem; align-items: start;
-    }
-    .report-copy h2 {
-      font-family: var(--display);
-      font-size: clamp(1.8rem, 3vw, 2.6rem);
-      font-weight: 700; line-height: 1.2;
-      color: var(--ink); margin-bottom: 1rem;
-      letter-spacing: -0.02em;
-    }
-    .report-copy p {
-      font-size: 0.82rem; color: var(--ink-muted);
-      line-height: 1.85; margin-bottom: 2rem; font-weight: 300;
-    }
-    .report-link {
-      font-size: 0.72rem; color: var(--canopy);
-      text-decoration: none; letter-spacing: 0.08em;
-      border-bottom: 1px solid var(--sage-light);
-      padding-bottom: 2px; transition: all 0.2s;
-    }
-    .report-link:hover { color: var(--forest); border-color: var(--pine); }
-
-    .mock {
+    .ss-action {
       background: #fff;
-      border: 1px solid var(--border);
-      border-radius: 3px; overflow: hidden;
-      box-shadow: 0 12px 40px rgba(26,46,26,0.1);
+      border: 1px solid rgba(26,26,24,.07);
+      border-radius: 8px;
+      padding: .7rem 1rem;
     }
-    .mock-bar {
-      background: var(--forest); padding: 0.75rem 1.2rem;
-      display: flex; align-items: center; justify-content: space-between;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
+    .ss-action-step {
+      font-size: .55rem; font-weight: 700;
+      letter-spacing: .1em; text-transform: uppercase;
+      color: var(--ink-faint);
+      margin-bottom: .25rem;
     }
-    .mock-bar-title { font-size: 0.62rem; color: rgba(255,255,255,0.45); letter-spacing: 0.06em; }
-    .mock-bar-status { font-size: 0.58rem; color: var(--sage-light); letter-spacing: 0.1em; text-transform: uppercase; }
-    .mock-body { padding: 1.2rem; }
-    .mock-metrics {
-      display: grid; grid-template-columns: repeat(4,1fr);
-      gap: 0.5rem; margin-bottom: 1rem;
+    .ss-action-text { font-size: .7rem; font-weight: 500; color: var(--ink-mid); line-height: 1.4; }
+    .ss-action-effort {
+      display: inline-block;
+      margin-top: .4rem;
+      font-size: .58rem; font-weight: 600;
+      background: var(--forest-pale);
+      color: var(--forest-mid);
+      padding: .15rem .5rem; border-radius: 3px;
     }
-    .mock-m {
-      background: var(--bg); border: 1px solid var(--border);
-      border-radius: 2px; padding: 0.6rem;
-    }
-    .mock-m-label { font-size: 0.5rem; color: var(--ink-muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.25rem; }
-    .mock-m-val { font-size: 1.2rem; font-weight: 300; color: var(--ink); letter-spacing: -0.01em; }
-    .mock-m-val.green { color: var(--moss); }
-    .mock-m-val.warn  { color: var(--brown-mid); }
-    .mock-finding {
-      border-left: 1.5px solid; padding: 0.6rem 0.85rem;
-      margin-bottom: 0.4rem; border-radius: 0 2px 2px 0;
-    }
-    .mock-finding.red   { border-color: #a04040; background: rgba(160,64,64,0.05); }
-    .mock-finding.amber { border-color: var(--brown-mid); background: rgba(110,80,56,0.06); }
-    .mock-finding.green { border-color: var(--moss); background: rgba(78,116,80,0.06); }
-    .mock-finding-title { font-size: 0.72rem; font-weight: 400; color: var(--ink); margin-bottom: 0.15rem; }
-    .mock-finding-sub { font-size: 0.6rem; color: var(--ink-muted); letter-spacing: 0.02em; }
 
-    /* ── PRICING — warm off-white ── */
-    .pricing-section {
-      padding: 5rem 4%;
-      background: var(--bg-warm);
+
+    /* ─── NUMBERED TABS SECTION (Watershed's signature) ─── */
+    .platform-section {
+      padding: 7rem 3rem;
+      padding-top: calc(7rem + 52px);
       border-bottom: 1px solid var(--border);
     }
-    .pricing-layout {
-      display: grid; grid-template-columns: 1fr 1fr;
-      gap: 6rem; align-items: start;
-    }
-    .pricing-left h2 {
-      font-family: var(--display);
-      font-size: clamp(1.8rem, 3vw, 2.8rem);
-      font-weight: 700; color: var(--ink);
-      letter-spacing: -0.02em; line-height: 1.2;
+
+    .section-eyebrow {
+      font-size: .7rem; font-weight: 700;
+      letter-spacing: .18em; text-transform: uppercase;
+      color: var(--mocha-mid);
       margin-bottom: 1rem;
     }
-    .pricing-left p {
-      font-size: 0.82rem; color: var(--ink-muted);
-      line-height: 1.85; font-weight: 300;
+
+    .platform-header {
+      display: flex; justify-content: space-between;
+      align-items: flex-end; gap: 3rem; flex-wrap: wrap;
+      margin-bottom: 3.5rem;
     }
-    .pricing-card {
+
+    .platform-heading {
+      font-family: 'Lora', serif;
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 500; line-height: 1.2;
+      letter-spacing: -.02em;
+      color: var(--ink);
+      max-width: 480px;
+    }
+
+    .platform-sub {
+      font-size: .9rem; font-weight: 300;
+      color: var(--ink-muted); line-height: 1.75;
+      max-width: 380px;
+    }
+    .platform-sub a {
+      color: var(--forest-mid); font-weight: 500;
+      text-decoration: none; border-bottom: 1px solid currentColor;
+      padding-bottom: 1px; transition: color .18s;
+    }
+    .platform-sub a:hover { color: var(--forest); }
+
+    .platform-body {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 3rem;
+      align-items: start;
+    }
+
+    /* Tab list */
+    .tab-list {
+      display: flex; flex-direction: column; gap: 0;
+      position: sticky; top: 5rem;
+    }
+
+    .tab-btn {
+      display: flex; align-items: flex-start; gap: 1rem;
+      padding: 1.1rem 0;
+      border: none; background: none; cursor: pointer;
+      text-align: left;
+      border-top: 1px solid var(--border);
+      transition: all .2s;
+    }
+    .tab-btn:last-child { border-bottom: 1px solid var(--border); }
+
+    .tab-num {
+      font-family: 'Lora', serif;
+      font-size: .85rem; font-style: italic;
+      color: var(--ink-faint);
+      min-width: 22px;
+      transition: color .2s;
+    }
+    .tab-label {
+      font-size: .82rem; font-weight: 600;
+      color: var(--ink-muted);
+      letter-spacing: -.01em;
+      line-height: 1.3;
+      transition: color .2s;
+    }
+    .tab-btn.active .tab-num { color: var(--forest-mid); }
+    .tab-btn.active .tab-label { color: var(--ink); }
+    .tab-btn.active { border-top-color: var(--forest-mid); }
+
+    /* Tab content panels */
+    .tab-panels { position: relative; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .tab-panel-img {
+      width: 100%;
+      border-radius: 14px;
+      overflow: hidden;
       border: 1px solid var(--border-mid);
-      border-radius: 3px; overflow: hidden;
-      background: var(--bg);
+      box-shadow: 0 4px 40px rgba(26,26,24,.09);
+      margin-bottom: 2rem;
+      background: var(--mocha-pale);
+      aspect-ratio: 16/10;
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
     }
-    .pricing-card-head {
-      padding: 2rem;
+
+    /* Placeholder "screenshot" inside tab panel */
+    .tab-panel-mockup {
+      width: 100%; height: 100%;
+      display: flex; flex-direction: column;
+    }
+
+    .mock-header-bar {
+      background: var(--forest);
+      padding: .6rem 1.2rem;
+      display: flex; align-items: center; gap: 1.5rem;
+    }
+    .mock-header-bar span {
+      font-size: .62rem; font-weight: 600;
+      letter-spacing: .1em; text-transform: uppercase;
+      color: rgba(255,255,255,.4);
+      cursor: pointer; padding-bottom: 2px;
+      border-bottom: 1px solid transparent;
+      transition: all .18s;
+    }
+    .mock-header-bar span.active-tab-mock {
+      color: rgba(255,255,255,.85);
+      border-bottom-color: rgba(255,255,255,.5);
+    }
+
+    .mock-body-area {
+      flex: 1;
+      background: #f5f3ee;
+      padding: 1.2rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: .8rem;
+      align-content: start;
+    }
+
+    .mock-card {
+      background: #fff;
+      border: 1px solid rgba(26,26,24,.07);
+      border-radius: 8px;
+      padding: .9rem;
+    }
+    .mock-card.wide { grid-column: 1 / 3; }
+    .mock-card.full { grid-column: 1 / 4; }
+    .mock-card-label {
+      font-size: .52rem; font-weight: 700;
+      letter-spacing: .1em; text-transform: uppercase;
+      color: var(--ink-faint); margin-bottom: .5rem;
+    }
+    .mock-card-value {
+      font-family: 'Lora', serif;
+      font-size: 1.5rem; font-weight: 500;
+      color: var(--ink);
+    }
+    .mock-card-value.green { color: var(--forest-lt); }
+    .mock-card-value.mocha { color: var(--mocha); }
+    .mock-bar-group { display: flex; flex-direction: column; gap: .4rem; margin-top: .3rem; }
+    .mock-bar-row { display: flex; align-items: center; gap: .5rem; }
+    .mock-bar-lbl { font-size: .58rem; color: var(--ink-faint); font-weight: 600; width: 60px; text-transform: uppercase; letter-spacing: .06em; }
+    .mock-bar-track { flex: 1; height: 5px; background: rgba(26,26,24,.06); border-radius: 3px; overflow: hidden; }
+    .mock-bar-fill { height: 100%; border-radius: 3px; }
+    .mock-bar-fill.green { background: var(--forest-lt); }
+    .mock-bar-fill.mocha { background: var(--mocha-lt); }
+    .mock-bar-val { font-size: .6rem; color: var(--ink-muted); font-weight: 600; min-width: 28px; text-align: right; }
+
+    .mock-list-row {
+      display: flex; align-items: center; gap: .6rem;
+      padding: .4rem 0; border-bottom: 1px solid rgba(26,26,24,.05);
+    }
+    .mock-list-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .mock-list-dot.red { background: #b84040; }
+    .mock-list-dot.amber { background: var(--mocha-lt); }
+    .mock-list-dot.green { background: var(--forest-lt); }
+    .mock-list-text { font-size: .65rem; font-weight: 500; color: var(--ink-mid); flex: 1; }
+    .mock-list-amt { font-size: .65rem; font-weight: 700; color: #b84040; }
+    .mock-list-amt.green { color: var(--forest-lt); }
+
+    .tab-panel-copy h3 {
+      font-family: 'Lora', serif;
+      font-size: 1.4rem; font-weight: 500;
+      letter-spacing: -.01em; line-height: 1.3;
+      color: var(--ink); margin-bottom: .7rem;
+    }
+    .tab-panel-copy p {
+      font-size: .88rem; font-weight: 300;
+      color: var(--ink-muted); line-height: 1.8;
+    }
+
+    /* ─── FEATURES GRID ─── */
+    .features-section {
+      padding: 7rem 3rem;
       border-bottom: 1px solid var(--border);
-      background: var(--canopy);
+      background: var(--mocha-wash);
     }
-    .p-label {
-      font-size: 0.6rem; letter-spacing: 0.18em;
-      text-transform: uppercase; color: rgba(255,255,255,0.4);
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      margin-top: 3rem;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .feature-cell {
+      padding: 2.2rem;
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: #fff;
+      transition: background .22s;
+    }
+    .feature-cell:hover { background: var(--forest-wash); }
+    .feature-cell:nth-child(3n) { border-right: none; }
+    .feature-cell:nth-child(n+4) { border-bottom: none; }
+
+    .feature-icon {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 1.1rem;
+    }
+    .fi-green { background: var(--forest-pale); color: var(--forest-mid); }
+    .fi-mocha { background: var(--mocha-pale); color: var(--mocha); }
+
+    .feature-title {
+      font-size: .95rem; font-weight: 600;
+      color: var(--ink); letter-spacing: -.01em;
+      margin-bottom: .5rem;
+    }
+    .feature-desc {
+      font-size: .82rem; font-weight: 300;
+      color: var(--ink-muted); line-height: 1.75;
+    }
+
+    /* ─── CTA ─── */
+    .cta-section {
+      padding: 8rem 3rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      background: var(--off-white);
+    }
+
+    /* Soft radial glow */
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      top: -30%; left: 50%;
+      transform: translateX(-50%);
+      width: 800px; height: 500px;
+      background: radial-gradient(ellipse, rgba(61,122,61,.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .cta-inner { position: relative; z-index: 1; max-width: 640px; margin: 0 auto; }
+
+    .cta-heading {
+      font-family: 'Lora', serif;
+      font-size: clamp(2.2rem, 4.5vw, 3.5rem);
+      font-weight: 500; line-height: 1.15;
+      letter-spacing: -.02em;
+      color: var(--ink);
       margin-bottom: 1.2rem;
     }
-    .p-amount {
-      font-size: 4.5rem; font-weight: 300;
-      color: #fff; letter-spacing: -0.03em;
-      line-height: 1; margin-bottom: 0.3rem;
-    }
-    .p-period { font-size: 0.75rem; color: rgba(255,255,255,0.45); }
-    .pricing-card-body { padding: 1.5rem 2rem; }
-    .p-list { list-style: none; margin-bottom: 1.8rem; }
-    .p-list li {
-      font-size: 0.8rem; color: var(--ink-mid);
-      padding: 0.55rem 0;
-      border-bottom: 1px solid var(--border);
-      display: flex; gap: 0.8rem; align-items: center;
-      font-weight: 300;
-    }
-    .p-list li::before {
-      content: ''; width: 4px; height: 4px;
-      border-radius: 50%; background: var(--moss);
-      flex-shrink: 0;
-    }
-    .btn-p {
-      display: block; width: 100%; padding: 0.85rem;
-      background: var(--forest); color: var(--bg);
-      border: none; border-radius: 2px;
-      font-size: 0.78rem; font-weight: 500;
-      letter-spacing: 0.06em;
-      text-decoration: none; transition: all 0.22s; cursor: none;
-      font-family: 'Inter', sans-serif;
-    }
-    .btn-p:hover { background: var(--canopy); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(28,46,28,0.18); }
-    .p-note {
-      font-size: 0.6rem; color: var(--ink-faint);
-      margin-top: 0.9rem; letter-spacing: 0.08em; text-align: center;
+    .cta-heading em { font-style: italic; color: var(--forest-mid); }
+
+    .cta-sub {
+      font-size: .95rem; font-weight: 300;
+      color: var(--ink-muted); line-height: 1.75;
+      max-width: 480px; margin: 0 auto 2.5rem;
     }
 
-    /* ── FOOTER — forest ── */
+    .cta-actions {
+      display: flex; align-items: center; justify-content: center;
+      gap: 1rem; flex-wrap: wrap; margin-bottom: 1.2rem;
+    }
+
+    .btn-cta-primary {
+      font-family: 'DM Sans', sans-serif;
+      font-size: .9rem; font-weight: 600;
+      color: #fff; background: var(--forest);
+      padding: .9rem 2.2rem; border-radius: 10px;
+      text-decoration: none;
+      display: inline-flex; align-items: center; gap: 7px;
+      transition: all .22s;
+      box-shadow: 0 4px 20px rgba(30,58,30,.25);
+    }
+    .btn-cta-primary:hover { background: var(--forest-mid); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(30,58,30,.3); }
+    .btn-cta-primary .arr { transition: transform .18s; }
+    .btn-cta-primary:hover .arr { transform: translateX(3px); }
+
+    .btn-cta-ghost {
+      font-size: .88rem; font-weight: 500;
+      color: var(--ink-muted); text-decoration: none;
+      padding: .9rem 1.8rem; border-radius: 10px;
+      border: 1px solid var(--border-mid);
+      transition: all .18s;
+    }
+    .btn-cta-ghost:hover { color: var(--ink); border-color: var(--ink-faint); }
+
+    .cta-fine {
+      font-size: .75rem; color: var(--ink-faint);
+      letter-spacing: .04em;
+    }
+
+    /* ─── FOOTER ─── */
     footer {
       background: var(--forest);
-      padding: 2rem 4%;
-      display: flex; align-items: center; justify-content: space-between;
-      flex-wrap: wrap; gap: 1rem;
+      padding: 3rem;
+      display: flex; align-items: center;
+      justify-content: space-between; gap: 1.5rem; flex-wrap: wrap;
+      border-top: 1px solid rgba(255,255,255,.06);
     }
+
     .footer-logo {
-      font-size: 0.78rem; font-weight: 500;
-      letter-spacing: 0.12em; text-transform: uppercase;
-      color: rgba(255,255,255,0.7);
+      font-family: 'Lora', serif;
+      font-size: 1.05rem; font-weight: 600;
+      color: rgba(255,255,255,.55); letter-spacing: -.01em;
+      display: flex; align-items: center; gap: 8px;
     }
-    .footer-links { display: flex; gap: 2.5rem; }
+    .footer-links {
+      display: flex; gap: 2.5rem;
+    }
     .footer-links a {
-      font-size: 0.65rem; color: rgba(255,255,255,0.3);
-      text-decoration: none; letter-spacing: 0.08em;
-      text-transform: uppercase; transition: color 0.2s;
+      font-size: .78rem; font-weight: 400;
+      color: rgba(255,255,255,.3); text-decoration: none;
+      transition: color .18s;
     }
-    .footer-links a:hover { color: rgba(255,255,255,0.8); }
+    .footer-links a:hover { color: rgba(255,255,255,.7); }
     .footer-copy {
-      font-size: 0.6rem; color: rgba(255,255,255,0.18);
-      letter-spacing: 0.06em;
+      font-size: .72rem; color: rgba(255,255,255,.2);
     }
 
-    /* ── REVEAL ── */
-    .reveal { opacity:0; transform:translateY(20px); transition:opacity 0.6s ease,transform 0.6s ease; }
-    .reveal.visible { opacity:1; transform:translateY(0); }
-    .d1 { transition-delay:0.12s; } .d2 { transition-delay:0.22s; }
+    /* ─── REVEAL ─── */
+    .reveal {
+      opacity: 0; transform: translateY(20px);
+      transition: opacity .75s ease, transform .75s ease;
+    }
+    .reveal.in { opacity: 1; transform: none; }
 
-    /* ── RESPONSIVE ── */
-    @media(max-width:960px){
-      .nav-center { display:none; }
-      .stat-bar { grid-template-columns:1fr 1fr; }
-      .how-grid { grid-template-columns:1fr; }
-      .features-layout { grid-template-columns:1fr; gap:3rem; }
-      .report-layout { grid-template-columns:1fr; gap:3rem; }
-      .pricing-layout { grid-template-columns:1fr; gap:3rem; }
-      .mock-metrics { grid-template-columns:1fr 1fr; }
-      .hero-top { flex-direction:column; gap:2rem; }
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 900px) {
+      nav { padding: 0 1.5rem; }
+      .nav-center { display: none; }
+      .platform-body { grid-template-columns: 1fr; }
+      .tab-list { flex-direction: row; overflow-x: auto; gap: 0; position: static; }
+      .tab-btn { min-width: 120px; border-top: none; border-bottom: 2px solid transparent; padding: .8rem .6rem; }
+      .tab-btn.active { border-bottom-color: var(--forest-mid); }
+      .screenshot-body { grid-template-columns: 1fr 1fr; }
+      .ss-metric { grid-column: span 1; }
+      .ss-finding-list { grid-column: 1 / 3; }
+      .ss-action-list { grid-column: 1 / 3; }
+      .features-grid { grid-template-columns: 1fr 1fr; }
+      .feature-cell:nth-child(3n) { border-right: 1px solid var(--border); }
+      .feature-cell:nth-child(2n) { border-right: none; }
+      .quote-section { grid-template-columns: 1fr; gap: 3rem; }
+      .platform-section, .features-section, .quote-section, .cta-section { padding: 4rem 1.5rem; }
+    .logo-bar { padding: 3rem 1.5rem; }
+    }
+    @media (max-width: 600px) {
+      .features-grid { grid-template-columns: 1fr; }
+      .feature-cell { border-right: none !important; }
+      .quote-stat-grid { grid-template-columns: 1fr 1fr; }
+      .hero h1 { font-size: 2.2rem; }
     }
   </style>
 </head>
 <body>
 
-<div id="cursor"></div>
-<div id="cursor-ring"></div>
-
 <!-- NAV -->
-<nav>
-  <a href="#" class="nav-logo">Scrapper</a>
+<nav id="nav">
+  <a href="/" class="nav-logo">WasteHound</a>
   <div class="nav-center">
-    <a href="#how" class="nav-item"><span class="nav-item-num">1 ↗</span> How It Works</a>
-    <a href="#features" class="nav-item"><span class="nav-item-num">2 ↗</span> Features</a>
-    <a href="#pricing" class="nav-item"><span class="nav-item-num">3 ↗</span> Pricing</a>
+    <a href="#how" class="nav-link">Platform</a>
+    <a href="#features" class="nav-link">What you get</a>
+    <a href="#" class="nav-link">Industries</a>
   </div>
   <div class="nav-right">
-    <a href="/audit" class="nav-cta">Start Free Audit</a>
-    <div class="nav-menu"><span></span><span></span><span></span></div>
+    <a href="#" class="btn-ghost-sm">Sign in</a>
+    <a href="/audit" class="btn-solid-sm">Free Audit</a>
   </div>
 </nav>
 
 <!-- HERO -->
 <section class="hero">
-  <div class="hero-top">
-    <h1 class="hero-headline">Find the savings hiding in your waste program.</h1>
-    <div class="hero-top-right">
-      <p>Upload your invoice. Answer a few questions. Get a full audit — savings identified, overcharges flagged, local options named — in under five minutes.</p>
-      <a href="/audit" class="btn-hero">Start Free Audit <span class="btn-arrow">→</span></a>
+  <div class="hero-bg"></div>
+
+  <div class="hero-content">
+    <h1>
+      Find the savings buried<br>
+      in your <em>waste spend.</em>
+    </h1>
+    <p class="hero-sub">
+      Upload your invoice, describe your waste setup, and get a complete audit in under 60 seconds — billing errors, inefficiencies, and an action plan ranked by dollar impact.
+    </p>
+    <div class="hero-actions">
+      <a href="/audit" class="btn-hero-primary">Run a free audit <span class="arr">→</span></a>
+      <a href="#how" class="btn-hero-ghost">See how it works ↓</a>
     </div>
   </div>
 
-  <!-- HERO IMAGE -->
-  <div class="hero-image-wrap">
-    <div class="hero-img-placeholder">
-      <div class="placeholder-icon">🌿</div>
-      <div class="placeholder-label">Image coming soon</div>
-    </div>
-    <div class="hero-image-overlay">
-      <span class="hero-image-caption">Waste Audit Intelligence</span>
-      <span class="hero-image-tag">Scrapper © 2025</span>
-    </div>
-  </div>
-
-  <div class="stat-bar">
-    <div class="stat-cell"><div class="stat-num">$4k+</div><div class="stat-label">Avg. annual savings found</div></div>
-    <div class="stat-cell"><div class="stat-num">94%</div><div class="stat-label">Of audits find overcharges</div></div>
-    <div class="stat-cell"><div class="stat-num">&lt; 5 min</div><div class="stat-label">To your full report</div></div>
-    <div class="stat-cell"><div class="stat-num">$0</div><div class="stat-label">To get started</div></div>
-  </div>
-</section>
-
-<!-- HOW IT WORKS -->
-<section class="how-section section" id="how">
-  <div class="section-tag">How It Works</div>
-  <div class="how-grid reveal">
-    <div class="how-cell">
-      <div class="how-step">01 / 03</div>
-      <h3>Upload your invoice</h3>
-      <p>Drop in your waste hauler bill — PDF, photo, or spreadsheet. Add a few details about your operation. Done in under two minutes.</p>
-      <div class="how-bg-num">1</div>
-    </div>
-    <div class="how-cell">
-      <div class="how-step">02 / 03</div>
-      <h3>We read everything</h3>
-      <p>Every line item examined. Regional benchmarks cross-referenced. Billing errors, inflated surcharges, and phantom fees identified automatically.</p>
-      <div class="how-bg-num">2</div>
-    </div>
-    <div class="how-cell">
-      <div class="how-step">03 / 03</div>
-      <h3>Get your audit</h3>
-      <p>Findings by severity. Savings ranked by dollar impact. Local vendors named. Printable. Actionable. Immediately.</p>
-      <div class="how-bg-num">3</div>
-    </div>
-  </div>
-</section>
-
-<!-- FEATURES -->
-<section class="features-section" id="features">
-  <div class="section-tag">What You Get</div>
-  <div class="features-layout">
-    <div class="features-left reveal">
-      <h2>Everything your hauler isn't telling you.</h2>
-      <p>Most waste bills are deliberately opaque. Scrapper cuts through that — finding the money you're leaving on the table every month.</p>
-    </div>
-    <ul class="feature-list reveal d1">
-      <li class="feature-item"><span class="feature-num">01</span><div class="feature-text"><h4>Line-by-line invoice analysis</h4><p>Every charge examined. Fuel surcharges, phantom admin fees, container rental markups — flagged with exact dollar amounts.</p></div></li>
-      <li class="feature-item"><span class="feature-num">02</span><div class="feature-text"><h4>Local diversion options, by name</h4><p>Not "consider composting." Actual composters, MRFs, and recyclers in your area — with realistic rate ranges.</p></div></li>
-      <li class="feature-item"><span class="feature-num">03</span><div class="feature-text"><h4>Contract watch</h4><p>Auto-renewal traps, rate lock expiry, renegotiation windows — flagged before they cost you another contract cycle.</p></div></li>
-      <li class="feature-item"><span class="feature-num">04</span><div class="feature-text"><h4>Efficiency score & benchmarking</h4><p>How you compare to similar businesses in your region. Know where you stand, and what it costs you to stay there.</p></div></li>
-      <li class="feature-item"><span class="feature-num">05</span><div class="feature-text"><h4>GHG & sustainability impact</h4><p>Your waste footprint in plain English — what you could divert, and what that means for your reporting.</p></div></li>
-    </ul>
-  </div>
-</section>
-
-<!-- STATEMENT -->
-<section class="statement-section">
-  <div class="statement-label">Industry Context</div>
-  <div class="statement-inner">
-    <p class="statement-text"><strong>90% of businesses</strong> are overpaying on waste. Most have no idea.</p>
-    <div class="statement-source">— Waste Consultants Inc.</div>
-  </div>
-</section>
-
-<!-- SAMPLE REPORT -->
-<section class="report-section">
-  <div class="section-tag">Sample Report</div>
-  <div class="report-layout">
-    <div class="report-copy reveal">
-      <h2>The report speaks for itself.</h2>
-      <p>No jargon. No filler. Findings, dollar amounts, and exactly what to do — written for a business owner, not a waste consultant.</p>
-      <a href="/audit" class="report-link">Run your audit and see →</a>
-    </div>
-    <div class="mock reveal d1">
-      <div class="mock-bar">
-        <span class="mock-bar-title">Scrapper Audit — Cedar &amp; Stone Home Goods</span>
-        <span class="mock-bar-status">Complete ✓</span>
-      </div>
-      <div class="mock-body">
-        <div class="mock-metrics">
-          <div class="mock-m"><div class="mock-m-label">Monthly Savings</div><div class="mock-m-val green">$312</div></div>
-          <div class="mock-m"><div class="mock-m-label">Issues Found</div><div class="mock-m-val warn">5</div></div>
-          <div class="mock-m"><div class="mock-m-label">Grade</div><div class="mock-m-val">C+</div></div>
-          <div class="mock-m"><div class="mock-m-label">Confidence</div><div class="mock-m-val green">High</div></div>
+  <!-- Bleeding screenshot card -->
+  <div class="hero-screenshot-wrap">
+    <div class="hero-screenshot">
+      <div class="screenshot-topbar">
+        <div class="screenshot-topbar-left">
+          <div class="topbar-dot r"></div>
+          <div class="topbar-dot y"></div>
+          <div class="topbar-dot g"></div>
+          <span class="topbar-title">WasteHound Audit Report</span>
         </div>
-        <div class="mock-finding red"><div class="mock-finding-title">Fuel surcharge at 14% — industry max is 8–9%</div><div class="mock-finding-sub">Overcharge: ~$62/mo · Dispute immediately</div></div>
-        <div class="mock-finding red"><div class="mock-finding-title">Contract auto-renews Oct 31 — 3 years locked in</div><div class="mock-finding-sub">Notice deadline: 11 days from now</div></div>
-        <div class="mock-finding amber"><div class="mock-finding-title">Technology Fee + Account Fee — no contractual basis</div><div class="mock-finding-sub">$32.50/mo in phantom charges</div></div>
-        <div class="mock-finding green"><div class="mock-finding-title">Cardboard diversion — Balcones Resources Austin</div><div class="mock-finding-sub">Est. $0 cost or potential rebate</div></div>
+        <div class="topbar-badge">Mesa Verde Kitchen · Los Angeles, CA</div>
+      </div>
+      <div class="screenshot-body">
+        <div class="ss-metric">
+          <div class="ss-metric-label">Monthly Savings</div>
+          <div class="ss-metric-value green">$195</div>
+        </div>
+        <div class="ss-metric">
+          <div class="ss-metric-label">Issues Found</div>
+          <div class="ss-metric-value amber">5</div>
+        </div>
+        <div class="ss-metric">
+          <div class="ss-metric-label">Efficiency Grade</div>
+          <div class="ss-metric-value red">D</div>
+        </div>
+        <div class="ss-finding-list">
+          <div class="ss-finding"><div class="ss-finding-bar red"></div><div class="ss-finding-text">Container oversized — 4yd at 50% fill, 3x/week</div><div class="ss-finding-amt red">−$90/mo</div></div>
+          <div class="ss-finding"><div class="ss-finding-bar amber"></div><div class="ss-finding-text">Variable rate creep — $40/mo unexplained increase over 12 months</div><div class="ss-finding-amt amber">−$40/mo</div></div>
+          <div class="ss-finding"><div class="ss-finding-bar green"></div><div class="ss-finding-text">SB 1383 compliance — organics program required, not active</div><div class="ss-finding-amt green">Act now</div></div>
+        </div>
+        <div class="ss-action-list">
+          <div class="ss-action">
+            <div class="ss-action-step">Action 1</div>
+            <div class="ss-action-text">Call Republic Services account rep — request downsize to 2-yard, 2x/week</div>
+            <div class="ss-action-effort">Low effort</div>
+          </div>
+          <div class="ss-action">
+            <div class="ss-action-step">Action 2</div>
+            <div class="ss-action-text">Search "SB 1383 organics hauler Los Angeles" — contact city waste division</div>
+            <div class="ss-action-effort">Medium effort</div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- PRICING -->
-<section class="pricing-section" id="pricing">
-  <div class="section-tag">Pricing</div>
-  <div class="pricing-layout">
-    <div class="pricing-left reveal">
-      <h2>Simple. Like it should be.</h2>
-      <p>Free to start. No credit card required. The first audit is on us — because we're confident you'll find enough savings to make the conversation worth having.</p>
+
+
+<!-- PLATFORM — NUMBERED TABS -->
+<section class="platform-section" id="how">
+  <div class="section-eyebrow reveal">The Platform</div>
+  <div class="platform-header reveal">
+    <h2 class="platform-heading">Rigorous analysis.<br>Real savings.</h2>
+    <p class="platform-sub">Most waste audits take weeks and cost thousands. WasteHound delivers the same depth in 60 seconds — powered by Claude Opus. <a href="/audit">Start your free audit →</a></p>
+  </div>
+
+  <div class="platform-body">
+    <div class="tab-list" id="tab-list">
+      <button class="tab-btn active" data-tab="0">
+        <span class="tab-num">01</span>
+        <span class="tab-label">Billing Analysis</span>
+      </button>
+      <button class="tab-btn" data-tab="1">
+        <span class="tab-num">02</span>
+        <span class="tab-label">Container Optimization</span>
+      </button>
+      <button class="tab-btn" data-tab="2">
+        <span class="tab-num">03</span>
+        <span class="tab-label">Benchmarking</span>
+      </button>
+      <button class="tab-btn" data-tab="3">
+        <span class="tab-num">04</span>
+        <span class="tab-label">Action Plan</span>
+      </button>
     </div>
-    <div class="pricing-card reveal d1">
-      <div class="pricing-card-head">
-        <div class="p-label">Full Audit Report</div>
-        <div class="p-amount">$0</div>
-        <p class="p-period">Free for your first audit</p>
+
+    <div class="tab-panels">
+
+      <!-- Tab 0 -->
+      <div class="tab-panel active" id="panel-0">
+        <div class="tab-panel-img">
+          <div class="tab-panel-mockup">
+            <div class="mock-header-bar">
+              <span class="active-tab-mock">Billing</span>
+              <span>Containers</span>
+              <span>Benchmarks</span>
+              <span>Action Plan</span>
+            </div>
+            <div class="mock-body-area">
+              <div class="mock-card full">
+                <div class="mock-card-label">Invoice line items — Republic Services · Nov 2024</div>
+                <div class="mock-list-row"><div class="mock-list-dot amber"></div><div class="mock-list-text">Base service — 4yd, 3x/week</div><div class="mock-list-amt" style="color:var(--ink-mid)">$340.00</div></div>
+                <div class="mock-list-row"><div class="mock-list-dot red"></div><div class="mock-list-text">Fuel/environmental surcharge — 28% (market avg. 18%)</div><div class="mock-list-amt">−$34.00 overcharge</div></div>
+                <div class="mock-list-row"><div class="mock-list-dot red"></div><div class="mock-list-text">Admin recovery fee — billed twice this month</div><div class="mock-list-amt">−$22.00 duplicate</div></div>
+                <div class="mock-list-row"><div class="mock-list-dot amber"></div><div class="mock-list-text">Container rental — included in base per contract</div><div class="mock-list-amt" style="color:var(--mocha)">Verify</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-panel-copy">
+          <h3>Every line item, benchmarked against market rates</h3>
+          <p>We parse your invoice and flag overcharges, duplicate fees, and surcharges that exceed regional norms — with the exact dollar amount you're losing each month.</p>
+        </div>
       </div>
-      <div class="pricing-card-body">
-        <ul class="p-list">
-          <li>Complete invoice analysis, line by line</li>
-          <li>Billing error &amp; overcharge detection</li>
-          <li>Local diversion options with vendor names</li>
-          <li>Contract watch &amp; renewal alerts</li>
-          <li>Efficiency score vs. regional benchmarks</li>
-          <li>Ranked action plan with dollar estimates</li>
-          <li>Printable PDF report</li>
-        </ul>
-        <a href="/audit" class="btn-p">Start Your Free Audit →</a>
-        <p class="p-note">No card required · Results in &lt; 5 min</p>
+
+      <!-- Tab 1 -->
+      <div class="tab-panel" id="panel-1">
+        <div class="tab-panel-img">
+          <div class="tab-panel-mockup">
+            <div class="mock-header-bar">
+              <span>Billing</span>
+              <span class="active-tab-mock">Containers</span>
+              <span>Benchmarks</span>
+              <span>Action Plan</span>
+            </div>
+            <div class="mock-body-area">
+              <div class="mock-card">
+                <div class="mock-card-label">Current setup</div>
+                <div class="mock-card-value mocha">4-yard</div>
+                <div style="font-size:.7rem;color:var(--ink-faint);margin-top:.3rem">3× / week pickup</div>
+              </div>
+              <div class="mock-card">
+                <div class="mock-card-label">Recommended</div>
+                <div class="mock-card-value green">2-yard</div>
+                <div style="font-size:.7rem;color:var(--ink-faint);margin-top:.3rem">2× / week pickup</div>
+              </div>
+              <div class="mock-card">
+                <div class="mock-card-label">Est. savings</div>
+                <div class="mock-card-value green">$90</div>
+                <div style="font-size:.7rem;color:var(--ink-faint);margin-top:.3rem">per month</div>
+              </div>
+              <div class="mock-card full">
+                <div class="mock-card-label">Fill level vs. capacity</div>
+                <div class="mock-bar-group">
+                  <div class="mock-bar-row"><div class="mock-bar-lbl">Current</div><div class="mock-bar-track"><div class="mock-bar-fill mocha" style="width:50%"></div></div><div class="mock-bar-val">50%</div></div>
+                  <div class="mock-bar-row"><div class="mock-bar-lbl">Optimal</div><div class="mock-bar-track"><div class="mock-bar-fill green" style="width:85%"></div></div><div class="mock-bar-val">80–90%</div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-panel-copy">
+          <h3>Right-size your service to your actual volume</h3>
+          <p>If your bins are half-empty at pickup, you're paying for capacity you don't use. We calculate the optimal container size and pickup schedule — and estimate exactly what you'll save.</p>
+        </div>
       </div>
+
+      <!-- Tab 2 -->
+      <div class="tab-panel" id="panel-2">
+        <div class="tab-panel-img">
+          <div class="tab-panel-mockup">
+            <div class="mock-header-bar">
+              <span>Billing</span>
+              <span>Containers</span>
+              <span class="active-tab-mock">Benchmarks</span>
+              <span>Action Plan</span>
+            </div>
+            <div class="mock-body-area">
+              <div class="mock-card wide">
+                <div class="mock-card-label">Your metrics vs. Restaurant sector (LA metro)</div>
+                <div class="mock-bar-group" style="margin-top:.8rem">
+                  <div class="mock-bar-row"><div class="mock-bar-lbl">Cost/yd³</div><div class="mock-bar-track"><div class="mock-bar-fill mocha" style="width:72%"></div></div><div class="mock-bar-val">$42</div></div>
+                  <div class="mock-bar-row"><div class="mock-bar-lbl">Benchmark</div><div class="mock-bar-track"><div class="mock-bar-fill green" style="width:45%"></div></div><div class="mock-bar-val">$28</div></div>
+                </div>
+              </div>
+              <div class="mock-card">
+                <div class="mock-card-label">Diversion rate</div>
+                <div class="mock-card-value mocha">12%</div>
+                <div style="font-size:.62rem;color:var(--ink-faint);margin-top:.3rem">Sector avg: 22%</div>
+              </div>
+              <div class="mock-card">
+                <div class="mock-card-label">Grade</div>
+                <div class="mock-card-value" style="color:#b84040">D</div>
+                <div style="font-size:.62rem;color:var(--ink-faint);margin-top:.3rem">Bottom quartile</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-panel-copy">
+          <h3>See how you compare to your peers</h3>
+          <p>Your cost per cubic yard, diversion rate, and cost per employee benchmarked against similar businesses in your sector and metro area. Know exactly where you stand.</p>
+        </div>
+      </div>
+
+      <!-- Tab 3 -->
+      <div class="tab-panel" id="panel-3">
+        <div class="tab-panel-img">
+          <div class="tab-panel-mockup">
+            <div class="mock-header-bar">
+              <span>Billing</span>
+              <span>Containers</span>
+              <span>Benchmarks</span>
+              <span class="active-tab-mock">Action Plan</span>
+            </div>
+            <div class="mock-body-area">
+              <div class="mock-card full">
+                <div class="mock-card-label">Action Plan — ranked by savings</div>
+                <div class="mock-list-row"><div class="mock-list-dot green"></div><div class="mock-list-text"><strong>1.</strong> Call account rep — request 2-yard, 2x/week. Low effort.</div><div class="mock-list-amt green">$90/mo</div></div>
+                <div class="mock-list-row"><div class="mock-list-dot green"></div><div class="mock-list-text"><strong>2.</strong> Dispute admin fee duplicate — email hauler billing dept. Low effort.</div><div class="mock-list-amt green">$22/mo</div></div>
+                <div class="mock-list-row"><div class="mock-list-dot green"></div><div class="mock-list-text"><strong>3.</strong> Negotiate fuel surcharge — cite market avg 18%. Medium effort.</div><div class="mock-list-amt green">$34/mo</div></div>
+                <div class="mock-list-row"><div class="mock-list-dot amber"></div><div class="mock-list-text"><strong>4.</strong> Enroll in SB 1383 organics program — compliance required. Medium effort.</div><div class="mock-list-amt" style="color:var(--mocha)">Required</div></div>
+              </div>
+              <div class="mock-card full">
+                <div class="mock-card-label">Total estimated savings</div>
+                <div class="mock-card-value green">$195 / month</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-panel-copy">
+          <h3>A prioritized plan you can act on today</h3>
+          <p>Every finding ranked by dollar impact and effort level. Who to call, what to say, and what to do first. No vague recommendations — just specific next steps.</p>
+        </div>
+      </div>
+
+    </div><!-- /tab-panels -->
+  </div><!-- /platform-body -->
+</section>
+
+<!-- FEATURES GRID -->
+<section class="features-section" id="features">
+  <div class="section-eyebrow reveal">What you get</div>
+  <h2 class="platform-heading reveal" style="margin-bottom:0">Everything in one report.</h2>
+
+  <div class="features-grid reveal">
+    <div class="feature-cell">
+      <div class="feature-icon fi-green"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="7.5" cy="7.5" r="5"/><line x1="11.5" y1="11.5" x2="16" y2="16"/></svg></div>
+      <div class="feature-title">Invoice line-item analysis</div>
+      <div class="feature-desc">Every charge cross-referenced against regional market rates. Overcharges, duplicate fees, and inflated surcharges flagged with exact dollar impact.</div>
     </div>
+    <div class="feature-cell">
+      <div class="feature-icon fi-mocha"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="14" height="11" rx="1.5"/><path d="M6 5V4a3 3 0 0 1 6 0v1"/><line x1="2" y1="9" x2="16" y2="9"/></svg></div>
+      <div class="feature-title">Container optimization</div>
+      <div class="feature-desc">Right-sized service recommendation based on your actual fill levels. Calculates optimal container size and pickup frequency to minimize cost.</div>
+    </div>
+    <div class="feature-cell">
+      <div class="feature-icon fi-green"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="10" width="3.5" height="6" rx="1"/><rect x="7.25" y="6" width="3.5" height="10" rx="1"/><rect x="12.5" y="2" width="3.5" height="14" rx="1"/></svg></div>
+      <div class="feature-title">Peer benchmarking</div>
+      <div class="feature-desc">Your waste costs and diversion rate benchmarked against similar businesses in your sector and metro area. Know exactly where you stand.</div>
+    </div>
+    <div class="feature-cell">
+      <div class="feature-icon fi-mocha"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9a6 6 0 0 1 6-6"/><path d="M15 9a6 6 0 0 1-6 6"/><polyline points="9 3 6.5 5.5 9 8"/><polyline points="9 15 11.5 12.5 9 10"/></svg></div>
+      <div class="feature-title">Diversion opportunities</div>
+      <div class="feature-desc">Specific programs to reduce landfill waste — food waste composting, cardboard recycling, cooking oil pickup — with net cost or savings for each.</div>
+    </div>
+    <div class="feature-cell">
+      <div class="feature-icon fi-green"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2L3 5v5c0 3.5 2.5 6.5 6 7.5 3.5-1 6-4 6-7.5V5L9 2z"/><polyline points="6.5 9 8.5 11 12 7"/></svg></div>
+      <div class="feature-title">Regulatory compliance</div>
+      <div class="feature-desc">State and local mandates screened against your current setup. SB 1383, AB 341, NYC commercial recycling, VT Act 148 — flagged before they become fines.</div>
+    </div>
+    <div class="feature-cell">
+      <div class="feature-icon fi-mocha"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="10" height="13" rx="1.5"/><line x1="7" y1="7" x2="11" y2="7"/><line x1="7" y1="10" x2="11" y2="10"/><line x1="7" y1="13" x2="9.5" y2="13"/></svg></div>
+      <div class="feature-title">Contract review</div>
+      <div class="feature-desc">Auto-renewal traps, rate escalation clauses, early termination penalties. Your negotiation window identified before it closes.</div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="cta-inner reveal">
+    <h2 class="cta-heading">Put the hound<br>on <em>the trail.</em></h2>
+    <p class="cta-sub">Five minutes of your time. A complete audit with every finding ranked by dollar impact — ready in under 60 seconds.</p>
+    <div class="cta-actions">
+      <a href="/audit" class="btn-cta-primary">Start free audit <span class="arr">→</span></a>
+      <a href="#how" class="btn-cta-ghost">See how it works</a>
+    </div>
+    <div class="cta-fine">Free · No signup · No sales call · Results in &lt;60 seconds</div>
   </div>
 </section>
 
 <!-- FOOTER -->
 <footer>
-  <span class="footer-logo">Scrapper</span>
+  <div class="footer-logo">WasteHound</div>
   <div class="footer-links">
-    <a href="#how">How It Works</a>
-    <a href="#features">Features</a>
-    <a href="#pricing">Pricing</a>
-    <a href="/audit">Get Started</a>
+    <a href="#how">Platform</a>
+    <a href="#features">What you get</a>
+    <a href="/audit">Free Audit</a>
   </div>
-  <span class="footer-copy">© 2025 Scrapper. All rights reserved.</span>
+  <div class="footer-copy">© 2025 WasteHound · Powered by Claude Opus</div>
 </footer>
 
 <script>
-  const cursor=document.getElementById('cursor');
-  const ring=document.getElementById('cursor-ring');
-  let mx=0,my=0,rx=0,ry=0;
-  document.addEventListener('mousemove',e=>{
-    mx=e.clientX; my=e.clientY;
-    cursor.style.left=mx+'px'; cursor.style.top=my+'px';
-  });
-  (function tick(){
-    rx+=(mx-rx)*0.09; ry+=(my-ry)*0.09;
-    ring.style.left=rx+'px'; ring.style.top=ry+'px';
-    requestAnimationFrame(tick);
-  })();
-  document.querySelectorAll('a,button,.how-cell,.feature-item').forEach(el=>{
-    el.addEventListener('mouseenter',()=>cursor.classList.add('big'));
-    el.addEventListener('mouseleave',()=>cursor.classList.remove('big'));
-  });
-  const obs=new IntersectionObserver(entries=>{
-    entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('visible'); });
-  },{threshold:0.1});
-  document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
-  document.querySelectorAll('a[href^="#"]').forEach(a=>{
-    a.addEventListener('click',e=>{
-      const t=document.querySelector(a.getAttribute('href'));
-      if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth'});}
+  // Nav scroll
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 20));
+
+  // Tabs
+  const tabBtns = document.querySelectorAll('.tab-btn');
+  const tabPanels = document.querySelectorAll('.tab-panel');
+  tabBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = btn.dataset.tab;
+      tabBtns.forEach(b => b.classList.remove('active'));
+      tabPanels.forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('panel-' + idx).classList.add('active');
     });
   });
+
+  // Scroll reveal
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); obs.unobserve(e.target); } });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
 </script>
 </body>
 </html>
