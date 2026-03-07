@@ -1,149 +1,271 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Something went wrong — Scrapper</title>
+  <title>Something went wrong — WasteHound</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display:ital,wght@0,700;0,800;1,700;1,800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
     :root {
-      --bg: #f0ece3; --bg-warm: #e8e2d6;
-      --ink: #1a1a14; --ink-mid: #3a3a2e; --ink-muted: #7a7a68; --ink-faint: #aeae98;
-      --forest: #1c2e1c; --canopy: #2a4430; --moss: #4e7450;
-      --umber: #4a3020; --brown-mid: #6e5038; --parchment-lt: #ede0c8;
-      --border: rgba(26,26,20,0.1); --border-mid: rgba(26,26,20,0.15);
-      --display: 'Playfair Display', Georgia, serif;
+      --forest:     #1a2e18;
+      --forest-mid: #243d21;
+      --forest-lt:  #2e4e2a;
+      --forest-pale:#dfe8db;
+      --forest-wash:#edf0eb;
+      --mocha:      #7a5c3e;
+      --mocha-mid:  #9c7a58;
+      --mocha-lt:   #c4a882;
+      --mocha-pale: #f2ebe0;
+      --mocha-wash: #faf6f0;
+      --ink:        #1a1a18;
+      --ink-mid:    #3d3d38;
+      --ink-muted:  #7a7870;
+      --ink-faint:  #b8b5ae;
+      --white:      #ffffff;
+      --off-white:  #fafaf7;
+      --border:     rgba(26,26,24,.08);
+      --border-mid: rgba(26,26,24,.13);
+      --red:        #8a3030;
+      --red-pale:   #f8f0f0;
     }
-    html { scroll-behavior: smooth; }
-    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--ink); -webkit-font-smoothing: antialiased; cursor: none; min-height: 100vh; display: flex; flex-direction: column; }
-    #cursor { position:fixed; pointer-events:none; z-index:9999; width:6px; height:6px; background:var(--ink); border-radius:50%; transform:translate(-50%,-50%); transition:width 0.18s,height 0.18s; }
-    #cursor.big { width:36px; height:36px; background:transparent; border:1px solid rgba(26,26,20,0.3); }
-    #cursor-ring { position:fixed; pointer-events:none; z-index:9998; width:28px; height:28px; border:1px solid rgba(26,26,20,0.12); border-radius:50%; transform:translate(-50%,-50%); }
 
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--off-white);
+      color: var(--ink);
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+    }
+
+    /* ── NAV ── */
     nav {
-      position: fixed; top: 0; width: 100%; z-index: 100;
-      padding: 0 4%; height: 52px;
+      height: 64px;
       display: flex; align-items: center; justify-content: space-between;
-      background: rgba(240,236,227,0.92); backdrop-filter: blur(16px);
+      padding: 0 3rem;
+      background: rgba(250,250,247,.92);
       border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
     }
-    .nav-logo { font-family: var(--display); font-size: 1.3rem; font-weight: 700; color: var(--ink); text-decoration: none; }
-    .nav-back { font-size: 0.72rem; color: var(--ink-muted); text-decoration: none; letter-spacing: 0.04em; transition: color 0.2s; }
-    .nav-back:hover { color: var(--ink); }
+    .nav-logo {
+      font-family: 'Lora', serif;
+      font-size: 1.2rem; font-weight: 600;
+      color: var(--forest); text-decoration: none;
+      letter-spacing: -.01em;
+    }
+    .nav-link {
+      font-size: .82rem; color: var(--ink-muted);
+      text-decoration: none; transition: color .18s;
+    }
+    .nav-link:hover { color: var(--ink); }
 
-    .error-wrap {
-      flex: 1; display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      padding: 8rem 4% 5rem; text-align: center;
-    }
-    .error-code {
-      font-family: var(--display);
-      font-size: clamp(5rem, 14vw, 11rem);
-      font-weight: 800; color: rgba(26,26,20,0.06);
-      line-height: 1; letter-spacing: -0.04em;
-      margin-bottom: -1rem; user-select: none;
-    }
-    .error-icon { font-size: 2.2rem; margin-bottom: 1.5rem; opacity: 0.5; }
-    .error-title {
-      font-family: var(--display);
-      font-size: clamp(1.8rem, 3.5vw, 2.8rem);
-      font-weight: 700; color: var(--ink);
-      letter-spacing: -0.02em; margin-bottom: 1rem;
-      line-height: 1.15;
-    }
-    .error-sub {
-      font-size: 0.88rem; color: var(--ink-muted);
-      line-height: 1.8; max-width: 440px;
-      margin: 0 auto 2.5rem; font-weight: 300;
+    /* ── MAIN ── */
+    main {
+      flex: 1;
+      display: flex; align-items: center; justify-content: center;
+      padding: 4rem 2rem;
     }
 
-    /* Error detail box */
+    .error-card {
+      width: 100%; max-width: 580px;
+    }
+
+    /* Error type indicator */
+    .error-type {
+      display: inline-flex; align-items: center; gap: .5rem;
+      font-size: .68rem; font-weight: 600;
+      letter-spacing: .14em; text-transform: uppercase;
+      color: var(--red);
+      margin-bottom: 1.5rem;
+    }
+    .error-type-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--red); flex-shrink: 0;
+    }
+
+    /* Headline */
+    .error-headline {
+      font-family: 'Lora', serif;
+      font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+      font-weight: 500; font-style: italic;
+      line-height: 1.15; letter-spacing: -.02em;
+      color: var(--ink);
+      margin-bottom: 1rem;
+    }
+
+    .error-body {
+      font-size: .9rem; font-weight: 300;
+      color: var(--ink-muted); line-height: 1.8;
+      margin-bottom: 2rem;
+      max-width: 460px;
+    }
+
+    /* Error detail box — shows the actual message if available */
     .error-detail {
-      max-width: 520px; width: 100%;
-      background: var(--parchment-lt);
-      border: 1px solid var(--border-mid);
-      border-radius: 3px; padding: 1.4rem 1.6rem;
-      margin-bottom: 2.5rem; text-align: left;
+      background: var(--red-pale);
+      border: 1px solid rgba(138,48,48,.12);
+      border-left: 3px solid var(--red);
+      border-radius: 0 10px 10px 0;
+      padding: 1rem 1.2rem;
+      margin-bottom: 2rem;
     }
     .error-detail-label {
-      font-size: 0.58rem; letter-spacing: 0.18em;
-      text-transform: uppercase; color: var(--ink-muted);
-      margin-bottom: 0.6rem; display: flex; align-items: center; gap: 0.5rem;
+      font-size: .62rem; font-weight: 600;
+      letter-spacing: .12em; text-transform: uppercase;
+      color: var(--red); margin-bottom: .4rem;
     }
-    .error-detail-label::before { content:''; width:12px; height:1px; background:currentColor; }
     .error-detail-msg {
-      font-size: 0.78rem; color: var(--ink-mid);
-      line-height: 1.7; font-family: 'Inter', monospace;
+      font-size: .82rem; font-weight: 300;
+      color: var(--ink-mid); line-height: 1.65;
+      font-family: 'DM Sans', monospace;
     }
 
-    .error-actions { display: flex; gap: 0.8rem; flex-wrap: wrap; justify-content: center; }
+    /* Suggestions */
+    .error-suggestions {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.4rem 1.6rem;
+      margin-bottom: 2rem;
+    }
+    .suggestions-label {
+      font-size: .68rem; font-weight: 600;
+      letter-spacing: .14em; text-transform: uppercase;
+      color: var(--ink-faint);
+      margin-bottom: 1rem;
+      display: flex; align-items: center; gap: .6rem;
+    }
+    .suggestions-label::before { content: ''; width: 14px; height: 1px; background: currentColor; }
+    .suggestion-list {
+      list-style: none; padding: 0;
+      display: flex; flex-direction: column; gap: .6rem;
+    }
+    .suggestion-list li {
+      display: flex; align-items: flex-start; gap: .7rem;
+      font-size: .83rem; font-weight: 300;
+      color: var(--ink-mid); line-height: 1.6;
+    }
+    .suggestion-list li::before {
+      content: '';
+      width: 5px; height: 5px; border-radius: 50%;
+      background: var(--mocha-lt);
+      flex-shrink: 0; margin-top: .55rem;
+    }
+
+    /* Actions */
+    .error-actions {
+      display: flex; gap: .8rem; flex-wrap: wrap;
+    }
     .btn {
-      display: inline-flex; align-items: center; gap: 0.5rem;
-      padding: 0.75rem 1.6rem; border-radius: 2px;
-      font-size: 0.78rem; font-weight: 500;
-      text-decoration: none; border: none; cursor: none;
-      transition: all 0.22s; font-family: 'Inter', sans-serif;
-      letter-spacing: 0.03em;
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: .88rem; font-weight: 600;
+      padding: .85rem 1.8rem; border-radius: 10px;
+      text-decoration: none; border: none; cursor: pointer;
+      transition: all .2s;
     }
-    .btn.primary { background: var(--forest); color: var(--bg); }
-    .btn.primary:hover { background: var(--canopy); transform: translateY(-1px); }
-    .btn.secondary { background: #fff; color: var(--ink); border: 1px solid var(--border-mid); }
-    .btn.secondary:hover { border-color: var(--moss); color: var(--moss); }
+    .btn-primary {
+      background: var(--forest); color: var(--white);
+      box-shadow: 0 4px 16px rgba(26,46,24,.2);
+    }
+    .btn-primary:hover { background: var(--forest-mid); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(26,46,24,.28); }
+    .btn-primary .arr { transition: transform .18s; }
+    .btn-primary:hover .arr { transform: translateX(3px); }
+    .btn-secondary {
+      background: var(--white); color: var(--ink-mid);
+      border: 1px solid var(--border-mid);
+      font-weight: 400;
+    }
+    .btn-secondary:hover { border-color: var(--ink-faint); color: var(--ink); }
 
+    /* Divider */
+    .error-divider {
+      border: none; border-top: 1px solid var(--border);
+      margin: 2.5rem 0;
+    }
+
+    /* ── FOOTER ── */
     footer {
-      background: var(--forest); padding: 1.8rem 4%;
+      border-top: 1px solid var(--border);
+      padding: 1.5rem 3rem;
       display: flex; align-items: center; justify-content: space-between;
       flex-wrap: wrap; gap: 1rem;
+      flex-shrink: 0;
     }
-    .footer-logo { font-family: var(--display); font-size: 1rem; font-weight: 700; color: rgba(255,255,255,0.6); }
-    .footer-copy { font-size: 0.6rem; color: rgba(255,255,255,0.2); letter-spacing: 0.06em; }
+    .footer-text {
+      font-size: .75rem; color: var(--ink-faint);
+    }
+    .footer-link {
+      font-size: .75rem; color: var(--ink-faint);
+      text-decoration: none; transition: color .18s;
+    }
+    .footer-link:hover { color: var(--ink-muted); }
+
+    @media (max-width: 600px) {
+      nav, footer { padding: 0 1.5rem; }
+      footer { padding-top: 1rem; padding-bottom: 1rem; }
+      main { padding: 2.5rem 1.5rem; align-items: flex-start; }
+      .error-actions { flex-direction: column; }
+      .btn { justify-content: center; }
+    }
   </style>
 </head>
 <body>
-<div id="cursor"></div>
-<div id="cursor-ring"></div>
 
 <nav>
-  <a href="/" class="nav-logo">Scrapper</a>
-  <a href="/" class="nav-back">← Back to home</a>
+  <a href="/" class="nav-logo">WasteHound</a>
+  <a href="/" class="nav-link">← Home</a>
 </nav>
 
-<div class="error-wrap">
-  <div class="error-code">Err</div>
-  <div class="error-icon">⚠</div>
-  <h1 class="error-title">Something went wrong.</h1>
-  <p class="error-sub">The audit couldn't be completed. This is usually a temporary issue — try submitting again, or check the details below.</p>
+<main>
+  <div class="error-card">
 
-  {% if error_message %}
-  <div class="error-detail">
-    <div class="error-detail-label">Error Detail</div>
-    <div class="error-detail-msg">{{ error_message }}</div>
-  </div>
-  {% endif %}
+    <div class="error-type">
+      <span class="error-type-dot"></span>
+      Error
+    </div>
 
-  <div class="error-actions">
-    <a href="/audit" class="btn primary">Try Again →</a>
-    <a href="/" class="btn secondary">Back to Home</a>
+    <h1 class="error-headline">
+      Something went wrong<br>with your audit.
+    </h1>
+
+    <p class="error-body">
+      The hound hit a snag. This is usually a temporary issue — most audits succeed on a second try. If it keeps happening, try simplifying your inputs or reducing the invoice file size.
+    </p>
+
+    {% if error_message %}
+    <div class="error-detail">
+      <div class="error-detail-label">Error detail</div>
+      <div class="error-detail-msg">{{ error_message }}</div>
+    </div>
+    {% endif %}
+
+    <div class="error-suggestions">
+      <div class="suggestions-label">Common fixes</div>
+      <ul class="suggestion-list">
+        <li>Try submitting again — transient errors often resolve on retry</li>
+        <li>If you uploaded an invoice, try a smaller file or convert to JPG first</li>
+        <li>Reduce the number of waste streams to the most important ones</li>
+        <li>Check your internet connection and try on a stable network</li>
+        <li>If the problem persists, try filling in the form without an invoice upload</li>
+      </ul>
+    </div>
+
+    <div class="error-actions">
+      <a href="/audit" class="btn btn-primary">Try again <span class="arr">→</span></a>
+      <a href="/" class="btn btn-secondary">← Home</a>
+    </div>
+
   </div>
-</div>
+</main>
 
 <footer>
-  <span class="footer-logo">Scrapper</span>
-  <span class="footer-copy">© 2025 Scrapper. All rights reserved.</span>
+  <span class="footer-text">WasteHound · Powered by Claude Opus 4.6</span>
+  <a href="/" class="footer-link">wastehound.com</a>
 </footer>
 
-<script>
-  const cursor=document.getElementById('cursor');
-  const ring=document.getElementById('cursor-ring');
-  let mx=0,my=0,rx=0,ry=0;
-  document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx+'px';cursor.style.top=my+'px';});
-  (function tick(){rx+=(mx-rx)*0.09;ry+=(my-ry)*0.09;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(tick);})();
-  document.querySelectorAll('a,button').forEach(el=>{
-    el.addEventListener('mouseenter',()=>cursor.classList.add('big'));
-    el.addEventListener('mouseleave',()=>cursor.classList.remove('big'));
-  });
-</script>
 </body>
 </html>
