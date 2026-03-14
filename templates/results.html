@@ -403,6 +403,37 @@
     <a href="/" class="action-btn secondary">← Home</a>
   </div>
 
+  <!-- Email nudge — appears after report loads -->
+  <div id="email-nudge" style="display:none; margin-top:2rem; padding:1.5rem 1.75rem;
+       background:var(--forest-wash); border:1px solid var(--forest-pale);
+       border-radius:14px;">
+    <div style="font-family:'Lora',serif; font-size:1rem; font-weight:500;
+         color:var(--forest); margin-bottom:.3rem;">
+      Want a copy sent to your inbox?
+    </div>
+    <p style="font-size:.78rem; font-weight:300; color:var(--ink-muted);
+       margin-bottom:1rem; line-height:1.65;">
+      We'll email you this report so you can refer back to it. No spam, no sales calls.
+    </p>
+    <div id="nudge-form" style="display:flex; gap:.6rem; flex-wrap:wrap;">
+      <input type="email" id="nudge-email" placeholder="you@yourbusiness.com"
+             style="flex:1; min-width:200px; padding:.65rem 1rem;
+                    border:1px solid var(--border-mid); border-radius:8px;
+                    font-family:'DM Sans',sans-serif; font-size:.82rem;
+                    background:var(--white); color:var(--ink); outline:none;" />
+      <button onclick="submitNudgeEmail()"
+              style="padding:.65rem 1.4rem; background:var(--forest); color:var(--white);
+                     border:none; border-radius:8px; font-family:'DM Sans',sans-serif;
+                     font-size:.82rem; font-weight:500; cursor:pointer; white-space:nowrap;">
+        Send my report
+      </button>
+    </div>
+    <div id="nudge-confirm" style="display:none; font-size:.82rem; color:var(--forest);
+         font-weight:500; margin-top:.6rem;">
+      ✓ Got it — we'll be in touch.
+    </div>
+  </div>
+
 </div>
 
 <script>
@@ -457,6 +488,10 @@
       evtSource.close();
       document.getElementById('bottom-actions').style.display = 'flex';
       document.getElementById('print-btn').style.display = 'block';
+      // Show email nudge only if they didn't already enter email on the form
+      if (!{{ 'true' if email_provided else 'false' }}) {
+        document.getElementById('email-nudge').style.display = 'block';
+      }
       output.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
@@ -472,6 +507,18 @@
         </div>`;
     }
   };
+
+  function submitNudgeEmail() {
+    const email = document.getElementById('nudge-email').value.trim();
+    if (!email) return;
+    fetch('/capture-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, token: token, source: 'nudge' })
+    });
+    document.getElementById('nudge-form').style.display = 'none';
+    document.getElementById('nudge-confirm').style.display = 'block';
+  }
 </script>
 </body>
 </html>
