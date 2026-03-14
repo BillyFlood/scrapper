@@ -390,6 +390,22 @@
 
   <form action="/submit" method="POST" enctype="multipart/form-data" id="audit-form">
 
+    <!-- EMAIL CAPTURE -->
+    <div class="form-section" style="background: var(--forest-wash); border-radius: 12px; padding: 1.5rem; border: 1px solid var(--forest-pale); margin-bottom: 2rem;">
+      <div class="section-label" style="margin-bottom: 1rem;">Get a copy of your report</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Email address <span style="color:var(--ink-faint);font-weight:300">(optional)</span></label>
+          <input type="email" name="email" placeholder="you@yourbusiness.com" />
+        </div>
+        <div style="display:flex; align-items:flex-end; padding-bottom:.1rem;">
+          <p style="font-size:.78rem; font-weight:300; color:var(--ink-muted); line-height:1.65;">
+            We'll send you a copy of your audit so you can refer back to it. No spam, no sales calls — just your report.
+          </p>
+        </div>
+      </div>
+    </div>
+
     <!-- 1. BUSINESS PROFILE -->
     <div class="form-section">
       <div class="section-label">Business Profile</div>
