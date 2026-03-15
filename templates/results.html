@@ -181,7 +181,7 @@
     }
     .metrics-row {
       display: grid;
-      grid-template-columns: repeat(6, 1fr);
+      grid-template-columns: repeat(5, 1fr);
       gap: .6rem; margin-bottom: 1rem;
     }
     .metric-box {
@@ -226,6 +226,17 @@
     .state-table td, .benchmark-table td {
       padding: .65rem .8rem; border-bottom: 1px solid var(--border);
       color: var(--ink-mid); font-weight: 300; vertical-align: top;
+    }
+
+
+    /* Reduction section */
+    .reduction-section { border-top: 3px solid var(--forest-lt); }
+    .reduction-section .finding-card.green {
+      border-left: 2px solid var(--forest-lt);
+      background: var(--forest-wash);
+    }
+    .reduction-section .finding-amount {
+      color: var(--forest-lt);
     }
 
     /* Findings */
