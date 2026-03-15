@@ -10,7 +10,7 @@ from pypdf import PdfReader
 from pathlib import Path
 
 # ── App setup ──
-app = Flask(__name__, template_folder=os.path.join(os.path.dirname(__file__), 'templates'))
+app = Flask(__name__, template_folder=os.path.join(os.path.dirname(__file__), 'Templates'))
 UPLOAD_FOLDER = 'uploads'
 LOG_FOLDER = 'logs'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -167,6 +167,10 @@ SYSTEM_PROMPT = """You are WasteHound, an expert waste management consultant wit
 
 Your audit reports are known for being punchy, specific, and immediately actionable. You do not write essays. You lead with the findings. Every issue gets a dollar amount. Every recommendation names a specific vendor, program, or action — not a generic suggestion.
 
+Your analysis covers TWO dimensions:
+1. DISPOSAL OPTIMIZATION — Are they paying too much to haul and process the waste they generate? Are there billing errors, right-sizing opportunities, diversion savings, or contract issues?
+2. WASTE REDUCTION — Can they generate less waste in the first place? Fewer tons generated means fewer tons to pay for. Analyze the business type, industry, and any details provided to identify specific upstream changes — procurement swaps, supplier take-back programs, reusable alternatives, inventory practices, packaging negotiations, portion/material controls — that would shrink the waste stream before it ever hits the dumpster.
+
 CRITICAL RULES:
 - Never write long paragraphs where a structured finding will do
 - Always put dollar amounts on findings and recommendations
@@ -174,6 +178,9 @@ CRITICAL RULES:
 - If you don't know the exact rate for a local vendor, give a realistic market range for that region
 - Quantify GHG/environmental impact in plain terms (e.g. "equivalent to removing X cars from the road")
 - Be direct. If something is wrong, say it plainly. Do not soften findings.
+- For every waste stream identified, ask: "Can this be reduced or eliminated at the source BEFORE optimizing its disposal?" Lead with reduction, then diversion, then disposal optimization — in that priority order.
+- Estimate volume reduction percentages and translate them into hauling frequency reductions and dollar savings (e.g. "Switching to reusable shipping totes eliminates ~2 cubic yards/week of cardboard → drop from 2x/week pickup to 1x/week → saves $X/mo")
+- Name specific products, suppliers, or programs for reduction recommendations — not generic advice like "reduce packaging"
 
 Format your response in clean HTML rendered directly in a web page. Use EXACTLY this structure:
 
@@ -194,6 +201,10 @@ Format your response in clean HTML rendered directly in a web page. Use EXACTLY 
       <div class="metric-box">
         <div class="metric-label">Efficiency Grade</div>
         <div class="metric-value">[A/B/C/D/F]</div>
+      </div>
+      <div class="metric-box">
+        <div class="metric-label">Reduction Potential</div>
+        <div class="metric-value">[X]%</div>
       </div>
       <div class="metric-box">
         <div class="metric-label">Confidence</div>
@@ -217,8 +228,26 @@ Format your response in clean HTML rendered directly in a web page. Use EXACTLY 
     </div>
   </div>
 
+  <div class="audit-section reduction-section">
+    <h2>Waste Reduction Opportunities</h2>
+    <p class="section-intro">These changes shrink your waste stream at the source — fewer tons generated means fewer tons to haul and pay for.</p>
+    <div class="finding-card green">
+      <div class="finding-header">
+        <span class="finding-title">[Short title e.g. "Switch to Reusable Produce Crates"]</span>
+        <span class="finding-amount">-[X] cubic yards/week</span>
+      </div>
+      <div class="finding-body">
+        <strong>Current waste generated:</strong> [What material, how much, why it exists — tied to a specific business practice or procurement choice.]<br/>
+        <strong>Reduction strategy:</strong> [Specific change — name exact products, suppliers, or programs. E.g. "Switch from single-use waxed cardboard produce boxes to IFCO reusable plastic crates through their RPCs program — your Sysco rep can set this up."]<br/>
+        <strong>Volume impact:</strong> [Estimated reduction in cubic yards or tons per week/month.]<br/>
+        <strong>Cost impact:</strong> [Net savings after any new costs. Tie to hauling frequency reduction, container downsizing, or both. E.g. "Eliminates ~3 CY/week of cardboard waste → downsize from 6 CY dumpster to 4 CY → saves $[X]/mo in hauling fees, minus $[Y]/mo crate program cost = net $[Z]/mo."]<br/>
+        <strong>Action:</strong> [Exactly what to do — who to contact, what to request.]
+      </div>
+    </div>
+  </div>
+
   <div class="audit-section">
-    <h2>Cost Saving Opportunities</h2>
+    <h2>Disposal Cost Savings</h2>
     <ol class="savings-list">
       <li>
         <strong>[Opportunity title]</strong> — Est. savings: <strong class="green">$[amount]/mo</strong><br/>
@@ -245,7 +274,7 @@ Format your response in clean HTML rendered directly in a web page. Use EXACTLY 
 
   <div class="audit-section action-plan-section">
     <h2>Your Action Plan</h2>
-    <p>Ranked by impact. Do these in order.</p>
+    <p>Ranked by impact. Reduction first, then optimization.</p>
     <ol class="action-list">
       <li>
         <strong>[Action title]</strong> <span class="action-impact">— saves ~$[amount]/mo</span><br/>
@@ -258,7 +287,7 @@ Format your response in clean HTML rendered directly in a web page. Use EXACTLY 
 
 HTML rules:
 - Use the exact class names above — they control styling
-- finding-card severity: red = billing errors, amber = inefficiencies, green = missed opportunities
+- finding-card severity: red = billing errors, amber = inefficiencies, green = reduction opportunities or missed opportunities
 - Use <strong> for dollar amounts, key terms, vendor names
 - Use <span class="green"> for savings, <span class="red"> for overcharges
 - No inline styles. No CSS. Just the HTML structure above.
@@ -302,6 +331,7 @@ def submit():
         'program_budget':      request.form.get('program_budget', ''),
         'existing_initiatives':request.form.get('existing_initiatives', ''),
         'additional_notes':    request.form.get('additional_notes', ''),
+        'email':               request.form.get('email', '').strip(),
     }
 
     # Handle invoice upload
@@ -314,13 +344,14 @@ def submit():
         invoice_file.save(invoice_path)
 
     # Log the incoming submission
-    logger.info(f"[{session_id}] New audit: {form_data['business_name']} | {form_data['business_type']} | {form_data['location']}")
+    logger.info(f"[{session_id}] New audit: {form_data['business_name']} | {form_data['business_type']} | {form_data['location']} | email: {form_data.get('email') or 'none'}")
     log_session(session_id, "submission", {
         "business_name": form_data['business_name'],
         "business_type": form_data['business_type'],
         "location": form_data['location'],
         "monthly_spend": form_data['monthly_spend'],
         "waste_hauler": form_data['waste_hauler'],
+        "email": form_data.get('email', ''),
         "invoice_uploaded": invoice_filename is not None,
         "form_data": form_data
     })
@@ -338,7 +369,8 @@ def submit():
 
     return render_template('results.html',
                            business_name=form_data['business_name'],
-                           token=token)
+                           token=token,
+                           email_provided=bool(form_data.get('email', '')))
 
 
 @app.route('/stream/<token>')
@@ -390,6 +422,24 @@ def stream(token):
             yield f"data: {json.dumps({'error': error_msg})}\n\n"
 
     return Response(stream_with_context(generate()), mimetype='text/event-stream')
+
+
+
+@app.route('/capture-email', methods=['POST'])
+def capture_email():
+    """Store email from post-results nudge."""
+    from flask import jsonify
+    data = request.get_json()
+    email = data.get('email', '').strip()
+    token = data.get('token', '')
+    source = data.get('source', 'nudge')
+    if email:
+        logger.info(f"Email captured via {source}: {email}")
+        log_session(token[:8] if token else 'unknown', 'email_capture', {
+            "email": email,
+            "source": source
+        })
+    return jsonify({"ok": True})
 
 
 # ── Admin page ──
@@ -444,6 +494,8 @@ def admin():
         spend = sub.get("monthly_spend", "")
         hauler = sub.get("waste_hauler", "")
         invoice = "Yes" if sub.get("invoice_uploaded") else "No"
+        email_capture = events.get("email_capture", {})
+        email = sub.get("email") or email_capture.get("email") or ""
         response_len = comp.get("response_length", err.get("error", ""))
         response_html = comp.get("response_html", "")
 
@@ -453,6 +505,7 @@ def admin():
             <td style="padding:.8rem"><strong>{business}</strong><br/>
                 <small style="color:#888">{btype} · {location}</small></td>
             <td style="padding:.8rem">${spend}/mo<br/><small style="color:#888">{hauler}</small></td>
+            <td style="padding:.8rem">{email or "<span style='color:#bbb'>—</span>"}</td>
             <td style="padding:.8rem">{invoice}</td>
             <td style="padding:.8rem">{status}</td>
             <td style="padding:.8rem">
