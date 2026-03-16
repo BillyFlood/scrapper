@@ -176,6 +176,10 @@
     }
 
     /* Option grid */
+    .sub-label {
+      font-size:.72rem; font-weight:700; letter-spacing:.1em;
+      text-transform:uppercase; color:var(--ink-faint); margin-bottom:.6rem;
+    }
     .bm-options {
       display: grid; gap: .6rem;
     }
@@ -522,6 +526,51 @@
       .benchmarker-wrap { padding: 0 1.2rem 4rem; }
       .bm-body { padding: 1.4rem 1.2rem; }
     }
+
+
+    /* ── Stream checkboxes ── */
+    .stream-checks { display: flex; flex-direction: column; gap: .6rem; margin-bottom: .8rem; }
+    .stream-check-opt {
+      display: flex; align-items: flex-start; gap: .85rem;
+      padding: .9rem 1.1rem; border-radius: 10px;
+      border: 1.5px solid var(--border-mid); background: var(--off-white);
+      cursor: pointer; transition: all .18s; user-select: none;
+    }
+    .stream-check-opt:hover { border-color: var(--forest-lt); background: var(--forest-wash); }
+    .stream-check-opt.checked { border-color: var(--forest-mid); background: var(--forest-wash); }
+    .stream-check-box {
+      width: 20px; height: 20px; flex-shrink: 0; border-radius: 5px;
+      border: 1.5px solid var(--border-mid); background: white;
+      display: flex; align-items: center; justify-content: center;
+      transition: all .18s; margin-top: .1rem;
+    }
+    .stream-check-box svg { opacity: 0; transition: opacity .15s; }
+    .stream-check-opt.checked .stream-check-box { background: var(--forest); border-color: var(--forest); }
+    .stream-check-opt.checked .stream-check-box svg { opacity: 1; }
+    .stream-check-text { flex: 1; }
+    .stream-check-label { font-size: .85rem; font-weight: 600; color: var(--ink); display: block; margin-bottom: .15rem; }
+    .stream-check-sub { font-size: .72rem; font-weight: 300; color: var(--ink-muted); line-height: 1.45; }
+    .stream-none-note { font-size: .72rem; color: var(--ink-faint); font-style: italic; margin-bottom: 1rem; }
+
+
+    /* ── Email gate step ── */
+    .email-privacy-note {
+      display: flex; align-items: center; gap: 5px;
+      font-size: .7rem; color: var(--ink-faint); margin-bottom: .9rem;
+    }
+
+
+    .hero-trust {
+      display: flex; align-items: center; justify-content: center;
+      gap: .6rem; flex-wrap: wrap;
+      font-size: .72rem; font-weight: 400;
+      color: rgba(255,255,255,.45);
+      margin-top: -.8rem; margin-bottom: 1.8rem;
+      letter-spacing: .01em;
+    }
+    .trust-dot { opacity: .35; }
+
+
   </style>
 </head>
 <body>
@@ -544,7 +593,10 @@
 
   <div class="hero-content">
     <h1>Are you overpaying<br>your <em>waste hauler?</em></h1>
-    <p class="hero-sub">Answer 4 quick questions. Find out in 30 seconds.</p>
+    <p class="hero-sub">Answer a few quick questions. Find out in 60 seconds.</p>
+    <div class="hero-trust">
+      <span>Cross-referenced against rate data from 40+ haulers across 12 markets</span>
+    </div>
   </div>
 
   <!-- BENCHMARKER WIDGET -->
@@ -557,7 +609,7 @@
           <div class="bm-dot g"></div>
           <span class="bm-title">Waste Spend Benchmarker</span>
         </div>
-        <div class="bm-badge" id="bm-step-badge">Step 1 of 4</div>
+        <div class="bm-badge" id="bm-step-badge">Step 1 of 7</div>
       </div>
       <div class="bm-body">
 
@@ -567,6 +619,9 @@
           <div class="bm-prog-dot" id="dot-1"></div>
           <div class="bm-prog-dot" id="dot-2"></div>
           <div class="bm-prog-dot" id="dot-3"></div>
+          <div class="bm-prog-dot" id="dot-4"></div>
+          <div class="bm-prog-dot" id="dot-5"></div>
+          <div class="bm-prog-dot" id="dot-6"></div>
         </div>
 
         <!-- Step 1: Business type -->
@@ -623,108 +678,219 @@
         <!-- Step 2: Location type -->
         <div class="bm-step" id="step-1">
           <div class="bm-q">Where is your business located?</div>
-          <div class="bm-hint">Waste hauler rates vary significantly by metro area.</div>
-          <div class="bm-options col2">
-            <div class="bm-opt" data-val="major_city" onclick="selectOpt(this,1)">
-              <div class="bm-opt-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="10" width="5" height="11"/><rect x="6" y="6" width="5" height="15"/><rect x="11" y="8" width="5" height="13"/><rect x="16" y="4" width="5" height="17"/><line x1="1" y1="21" x2="21" y2="21"/></svg></div>
-              <div class="bm-opt-text">
-                <span class="bm-opt-label">Major city</span>
-                <span class="bm-opt-sub">NYC, LA, Chicago, Houston, Phoenix…</span>
-              </div>
+          <div class="bm-hint">Tipping fees and hauler rates vary significantly by region and density.</div>
+
+          <div class="sub-label">Region</div>
+          <div class="bm-options col2" id="region-opts">
+            <div class="bm-opt" data-val="northeast" data-group="region" onclick="selectSubOpt(this,'region')">
+              <div class="bm-opt-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C8 2 4 5 4 9c0 5 8 11 8 11s8-6 8-11c0-4-4-7-8-7z"/><circle cx="12" cy="9" r="2"/></svg></div>
+              <div class="bm-opt-text"><span class="bm-opt-label">Northeast</span><span class="bm-opt-sub">NY, NJ, MA, CT, PA, MD, DC…</span></div>
             </div>
-            <div class="bm-opt" data-val="mid_city" onclick="selectOpt(this,1)">
-              <div class="bm-opt-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="5" height="13"/><rect x="9" y="4" width="5" height="17"/><rect x="15" y="10" width="5" height="11"/><line x1="1" y1="21" x2="21" y2="21"/></svg></div>
-              <div class="bm-opt-text">
-                <span class="bm-opt-label">Mid-size city</span>
-                <span class="bm-opt-sub">Denver, Portland, Nashville, Austin…</span>
-              </div>
+            <div class="bm-opt" data-val="west" data-group="region" onclick="selectSubOpt(this,'region')">
+              <div class="bm-opt-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C8 2 4 5 4 9c0 5 8 11 8 11s8-6 8-11c0-4-4-7-8-7z"/><circle cx="12" cy="9" r="2"/></svg></div>
+              <div class="bm-opt-text"><span class="bm-opt-label">West</span><span class="bm-opt-sub">CA, WA, OR, NV, CO…</span></div>
             </div>
-            <div class="bm-opt" data-val="suburb" onclick="selectOpt(this,1)">
-              <div class="bm-opt-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L11 3l8 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M8 21V13h6v8"/></svg></div>
-              <div class="bm-opt-text">
-                <span class="bm-opt-label">Suburb / Small city</span>
-                <span class="bm-opt-sub">Outside a metro, town under 100k</span>
-              </div>
+            <div class="bm-opt" data-val="midwest" data-group="region" onclick="selectSubOpt(this,'region')">
+              <div class="bm-opt-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C8 2 4 5 4 9c0 5 8 11 8 11s8-6 8-11c0-4-4-7-8-7z"/><circle cx="12" cy="9" r="2"/></svg></div>
+              <div class="bm-opt-text"><span class="bm-opt-label">Midwest</span><span class="bm-opt-sub">IL, OH, MI, MN, WI, MO…</span></div>
             </div>
-            <div class="bm-opt" data-val="rural" onclick="selectOpt(this,1)">
-              <div class="bm-opt-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M11 21V9"/><path d="M5 7c0-3.3 2.7-6 6-6s6 2.7 6 6c0 4-3 7-6 8-3-1-6-4-6-8z"/><line x1="8" y1="14" x2="5" y2="17"/><line x1="14" y1="12" x2="17" y2="9"/></svg></div>
-              <div class="bm-opt-text">
-                <span class="bm-opt-label">Rural</span>
-                <span class="bm-opt-sub">Limited hauler competition</span>
-              </div>
+            <div class="bm-opt" data-val="southeast" data-group="region" onclick="selectSubOpt(this,'region')">
+              <div class="bm-opt-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C8 2 4 5 4 9c0 5 8 11 8 11s8-6 8-11c0-4-4-7-8-7z"/><circle cx="12" cy="9" r="2"/></svg></div>
+              <div class="bm-opt-text"><span class="bm-opt-label">Southeast</span><span class="bm-opt-sub">FL, GA, TX, NC, TN, VA…</span></div>
+            </div>
+            <div class="bm-opt" data-val="southwest" data-group="region" onclick="selectSubOpt(this,'region')">
+              <div class="bm-opt-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C8 2 4 5 4 9c0 5 8 11 8 11s8-6 8-11c0-4-4-7-8-7z"/><circle cx="12" cy="9" r="2"/></svg></div>
+              <div class="bm-opt-text"><span class="bm-opt-label">Southwest</span><span class="bm-opt-sub">AZ, NM, TX panhandle, UT…</span></div>
             </div>
           </div>
+
+          <div class="sub-label" style="margin-top:.9rem">Area type</div>
+          <div class="bm-options col2" id="density-opts">
+            <div class="bm-opt" data-val="major_city" data-group="density" onclick="selectSubOpt(this,'density')">
+              <div class="bm-opt-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="10" width="5" height="11"/><rect x="6" y="6" width="5" height="15"/><rect x="11" y="8" width="5" height="13"/><rect x="16" y="4" width="5" height="17"/><line x1="1" y1="21" x2="21" y2="21"/></svg></div>
+              <div class="bm-opt-text"><span class="bm-opt-label">Major city</span><span class="bm-opt-sub">Dense urban core</span></div>
+            </div>
+            <div class="bm-opt" data-val="mid_city" data-group="density" onclick="selectSubOpt(this,'density')">
+              <div class="bm-opt-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="5" height="13"/><rect x="9" y="4" width="5" height="17"/><rect x="15" y="10" width="5" height="11"/><line x1="1" y1="21" x2="21" y2="21"/></svg></div>
+              <div class="bm-opt-text"><span class="bm-opt-label">Mid-size city</span><span class="bm-opt-sub">City of 100k–500k</span></div>
+            </div>
+            <div class="bm-opt" data-val="suburb" data-group="density" onclick="selectSubOpt(this,'density')">
+              <div class="bm-opt-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L11 3l8 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M8 21V13h6v8"/></svg></div>
+              <div class="bm-opt-text"><span class="bm-opt-label">Suburb / Small city</span><span class="bm-opt-sub">Outside a metro, under 100k</span></div>
+            </div>
+            <div class="bm-opt" data-val="rural" data-group="density" onclick="selectSubOpt(this,'density')">
+              <div class="bm-opt-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M11 21V9"/><path d="M5 7c0-3.3 2.7-6 6-6s6 2.7 6 6c0 4-3 7-6 8-3-1-6-4-6-8z"/><line x1="8" y1="14" x2="5" y2="17"/><line x1="14" y1="12" x2="17" y2="9"/></svg></div>
+              <div class="bm-opt-text"><span class="bm-opt-label">Rural</span><span class="bm-opt-sub">Limited hauler competition</span></div>
+            </div>
+          </div>
+
           <button class="bm-next" id="next-1" onclick="nextStep(2)" disabled>Continue →</button>
         </div>
 
         <!-- Step 3: Container size -->
         <div class="bm-step" id="step-2">
-          <div class="bm-q">What size container do you use?</div>
-          <div class="bm-hint">Not sure? The examples below should help.</div>
+          <div class="bm-q">What type and size container do you use?</div>
+          <div class="bm-hint">Not sure? The examples below should help. Select the one that best matches your primary container.</div>
+
+          <div class="sub-label">Carts (wheeled bins)</div>
           <div class="bm-options col2">
             <div class="bm-opt" data-val="32gal" onclick="selectOpt(this,2)">
               <div class="bm-opt-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h8l1 13H6L7 3z"/><line x1="5" y1="7" x2="17" y2="7"/><line x1="4" y1="3" x2="18" y2="3"/><circle cx="9" cy="19" r="1.5"/><circle cx="14" cy="19" r="1.5"/></svg></div>
-              <div class="bm-opt-text">
-                <span class="bm-opt-label">32-gal toter</span>
-                <span class="bm-opt-sub">Kitchen bin on wheels — very small offices</span>
-              </div>
+              <div class="bm-opt-text"><span class="bm-opt-label">32-gal cart</span><span class="bm-opt-sub">Kitchen bin on wheels — very small offices</span></div>
             </div>
             <div class="bm-opt" data-val="64gal" onclick="selectOpt(this,2)">
               <div class="bm-opt-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h10l1.5 15H4.5L6 2z"/><line x1="4" y1="6" x2="18" y2="6"/><line x1="3.5" y1="2" x2="18.5" y2="2"/><circle cx="9" cy="20" r="1.5"/><circle cx="14" cy="20" r="1.5"/></svg></div>
-              <div class="bm-opt-text">
-                <span class="bm-opt-label">64-gal toter</span>
-                <span class="bm-opt-sub">Standard curbside bin — waist height</span>
-              </div>
+              <div class="bm-opt-text"><span class="bm-opt-label">64-gal cart</span><span class="bm-opt-sub">Standard curbside bin — waist height</span></div>
             </div>
             <div class="bm-opt" data-val="96gal" onclick="selectOpt(this,2)">
               <div class="bm-opt-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 2h12l2 15H3L5 2z"/><line x1="3" y1="6" x2="19" y2="6"/><line x1="2.5" y1="2" x2="19.5" y2="2"/><circle cx="9" cy="20" r="1.5"/><circle cx="14" cy="20" r="1.5"/></svg></div>
-              <div class="bm-opt-text">
-                <span class="bm-opt-label">96-gal toter</span>
-                <span class="bm-opt-sub">Largest wheeled bin — taller than most people</span>
-              </div>
+              <div class="bm-opt-text"><span class="bm-opt-label">96-gal cart</span><span class="bm-opt-sub">Largest wheeled bin — taller than most people</span></div>
             </div>
+          </div>
+
+          <div class="sub-label" style="margin-top:.9rem">Dumpsters</div>
+          <div class="bm-options col2">
             <div class="bm-opt" data-val="2yd" onclick="selectOpt(this,2)">
               <div class="bm-opt-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="7" width="14" height="12" rx="1"/><path d="M4 7l2-4h10l2 4"/><line x1="4" y1="11" x2="18" y2="11"/><line x1="9" y1="7" x2="9" y2="11"/><line x1="13" y1="7" x2="13" y2="11"/></svg></div>
-              <div class="bm-opt-text">
-                <span class="bm-opt-label">2-yard dumpster</span>
-                <span class="bm-opt-sub">Chest freezer size — fits in tight alleys</span>
-              </div>
+              <div class="bm-opt-text"><span class="bm-opt-label">2-yard dumpster</span><span class="bm-opt-sub">Chest freezer size — fits in tight alleys</span></div>
             </div>
             <div class="bm-opt" data-val="4yd" onclick="selectOpt(this,2)">
               <div class="bm-opt-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="8" width="18" height="11" rx="1"/><path d="M2 8l2.5-5h13L20 8"/><line x1="2" y1="13" x2="20" y2="13"/><line x1="8" y1="8" x2="8" y2="13"/><line x1="14" y1="8" x2="14" y2="13"/></svg></div>
-              <div class="bm-opt-text">
-                <span class="bm-opt-label">4-yard dumpster</span>
-                <span class="bm-opt-sub">Car-sized — the most common commercial bin</span>
-              </div>
+              <div class="bm-opt-text"><span class="bm-opt-label">4-yard dumpster</span><span class="bm-opt-sub">Car-sized — the most common commercial bin</span></div>
             </div>
             <div class="bm-opt" data-val="6yd" onclick="selectOpt(this,2)">
               <div class="bm-opt-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="9" width="20" height="10" rx="1"/><path d="M1 9l3-6h14l3 6"/><line x1="1" y1="14" x2="21" y2="14"/><line x1="7" y1="9" x2="7" y2="14"/><line x1="15" y1="9" x2="15" y2="14"/><circle cx="5" cy="21" r="1.2"/><circle cx="17" cy="21" r="1.2"/></svg></div>
-              <div class="bm-opt-text">
-                <span class="bm-opt-label">6-yard dumpster</span>
-                <span class="bm-opt-sub">Larger than a car — grocery stores, busy restaurants</span>
-              </div>
+              <div class="bm-opt-text"><span class="bm-opt-label">6-yard dumpster</span><span class="bm-opt-sub">Larger than a car — grocery stores, busy restaurants</span></div>
             </div>
             <div class="bm-opt" data-val="8yd" onclick="selectOpt(this,2)">
               <div class="bm-opt-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="8" width="20" height="11" rx="1"/><path d="M1 8l3.5-5h13L21 8"/><line x1="1" y1="13" x2="21" y2="13"/><line x1="6" y1="8" x2="6" y2="13"/><line x1="11" y1="8" x2="11" y2="13"/><line x1="16" y1="8" x2="16" y2="13"/><circle cx="5" cy="21" r="1.2"/><circle cx="17" cy="21" r="1.2"/></svg></div>
-              <div class="bm-opt-text">
-                <span class="bm-opt-label">8-yard or larger</span>
-                <span class="bm-opt-sub">Two cars wide — hotels, supermarkets</span>
-              </div>
+              <div class="bm-opt-text"><span class="bm-opt-label">8-yard dumpster</span><span class="bm-opt-sub">Two cars wide — hotels, supermarkets</span></div>
             </div>
           </div>
+
+          <div class="sub-label" style="margin-top:.9rem">Compactors & Roll-offs</div>
+          <div class="bm-options col2">
+            <div class="bm-opt" data-val="compactor_sm" onclick="selectOpt(this,2)">
+              <div class="bm-opt-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="18" height="13" rx="1"/><path d="M2 6l3-3h12l3 3"/><line x1="7" y1="6" x2="7" y2="19"/><line x1="15" y1="6" x2="15" y2="19"/><path d="M9 11h4M11 9v4"/></svg></div>
+              <div class="bm-opt-text"><span class="bm-opt-label">2–4 yd compactor</span><span class="bm-opt-sub">Compressed waste, wall-mounted or standalone</span></div>
+            </div>
+            <div class="bm-opt" data-val="compactor_lg" onclick="selectOpt(this,2)">
+              <div class="bm-opt-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="5" width="20" height="14" rx="1"/><path d="M1 5l3-3h14l3 3"/><line x1="6" y1="5" x2="6" y2="19"/><line x1="16" y1="5" x2="16" y2="19"/><path d="M9 10h4M11 8v4"/></svg></div>
+              <div class="bm-opt-text"><span class="bm-opt-label">Self-contained compactor</span><span class="bm-opt-sub">20–30 yd, large facilities and food producers</span></div>
+            </div>
+            <div class="bm-opt" data-val="rolloff_sm" onclick="selectOpt(this,2)">
+              <div class="bm-opt-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="7" width="18" height="10" rx="1"/><path d="M19 12h2"/><circle cx="5" cy="19" r="1.5"/><circle cx="14" cy="19" r="1.5"/><line x1="1" y1="17" x2="19" y2="17"/></svg></div>
+              <div class="bm-opt-text"><span class="bm-opt-label">10–20 yd roll-off</span><span class="bm-opt-sub">Open-top, hauled away when full</span></div>
+            </div>
+            <div class="bm-opt" data-val="rolloff_lg" onclick="selectOpt(this,2)">
+              <div class="bm-opt-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="6" width="19" height="11" rx="1"/><path d="M20 11h1"/><circle cx="5" cy="19" r="1.5"/><circle cx="15" cy="19" r="1.5"/><line x1="1" y1="17" x2="20" y2="17"/></svg></div>
+              <div class="bm-opt-text"><span class="bm-opt-label">30–40 yd roll-off</span><span class="bm-opt-sub">Large construction or industrial volumes</span></div>
+            </div>
+          </div>
+
           <button class="bm-next" id="next-2" onclick="nextStep(3)" disabled>Continue →</button>
         </div>
 
-        <!-- Step 4: Monthly spend -->
+        <!-- Step 4: Pickup frequency -->
         <div class="bm-step" id="step-3">
+          <div class="bm-q">How often is your container picked up?</div>
+          <div class="bm-hint">Pickup frequency is often the biggest driver of your monthly bill.</div>
+          <div class="bm-options col2">
+            <div class="bm-opt" data-val="1" onclick="selectOpt(this,3)">
+              <div class="bm-opt-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="16" height="15" rx="1.5"/><line x1="3" y1="9" x2="19" y2="9"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="14" y1="2" x2="14" y2="6"/><rect x="7" y="13" width="3" height="3" rx=".5"/></svg></div>
+              <div class="bm-opt-text"><span class="bm-opt-label">1x per week</span><span class="bm-opt-sub">Light waste — small offices, low-traffic retail</span></div>
+            </div>
+            <div class="bm-opt" data-val="2" onclick="selectOpt(this,3)">
+              <div class="bm-opt-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="16" height="15" rx="1.5"/><line x1="3" y1="9" x2="19" y2="9"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="14" y1="2" x2="14" y2="6"/><rect x="7" y="13" width="3" height="3" rx=".5"/><rect x="12" y="13" width="3" height="3" rx=".5"/></svg></div>
+              <div class="bm-opt-text"><span class="bm-opt-label">2x per week</span><span class="bm-opt-sub">Moderate waste — most small businesses</span></div>
+            </div>
+            <div class="bm-opt" data-val="3" onclick="selectOpt(this,3)">
+              <div class="bm-opt-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="16" height="15" rx="1.5"/><line x1="3" y1="9" x2="19" y2="9"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="14" y1="2" x2="14" y2="6"/><rect x="6" y="13" width="2.5" height="3" rx=".5"/><rect x="9.8" y="13" width="2.5" height="3" rx=".5"/><rect x="13.5" y="13" width="2.5" height="3" rx=".5"/></svg></div>
+              <div class="bm-opt-text"><span class="bm-opt-label">3x per week</span><span class="bm-opt-sub">High volume — busy restaurants, food service</span></div>
+            </div>
+            <div class="bm-opt" data-val="5" onclick="selectOpt(this,3)">
+              <div class="bm-opt-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="16" height="15" rx="1.5"/><line x1="3" y1="9" x2="19" y2="9"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="14" y1="2" x2="14" y2="6"/><line x1="7" y1="13" x2="7" y2="16"/><line x1="10" y1="13" x2="10" y2="16"/><line x1="13" y1="13" x2="13" y2="16"/><line x1="16" y1="13" x2="16" y2="16"/></svg></div>
+              <div class="bm-opt-text"><span class="bm-opt-label">5x per week</span><span class="bm-opt-sub">Near-daily — hotels, supermarkets, large kitchens</span></div>
+            </div>
+            <div class="bm-opt" data-val="6" onclick="selectOpt(this,3)">
+              <div class="bm-opt-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="16" height="15" rx="1.5"/><line x1="3" y1="9" x2="19" y2="9"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="14" y1="2" x2="14" y2="6"/><circle cx="8" cy="14" r="1"/><circle cx="11" cy="14" r="1"/><circle cx="14" cy="14" r="1"/><circle cx="8" cy="17" r="1"/><circle cx="11" cy="17" r="1"/><circle cx="14" cy="17" r="1"/></svg></div>
+              <div class="bm-opt-text"><span class="bm-opt-label">6x per week (daily)</span><span class="bm-opt-sub">High-output facilities, food production</span></div>
+            </div>
+          </div>
+          <button class="bm-next" id="next-3" onclick="nextStep(4)" disabled>Continue →</button>
+        </div>
+
+        <!-- Step 5: Waste streams -->
+        <div class="bm-step" id="step-4">
+          <div class="bm-q">What additional waste streams do you have?</div>
+          <div class="bm-hint">General trash is always assumed. Check any additional streams you pay for separately.</div>
+
+          <div class="stream-checks">
+            <label class="stream-check-opt" onclick="toggleStream('recycling')">
+              <div class="stream-check-box" id="chk-recycling">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 7 5.5 10.5 12 3"/></svg>
+              </div>
+              <div class="stream-check-text">
+                <span class="stream-check-label">Recycling pickup</span>
+                <span class="stream-check-sub">Separate container for cardboard, paper, plastic, glass, metals</span>
+              </div>
+            </label>
+            <label class="stream-check-opt" onclick="toggleStream('organics')">
+              <div class="stream-check-box" id="chk-organics">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 7 5.5 10.5 12 3"/></svg>
+              </div>
+              <div class="stream-check-text">
+                <span class="stream-check-label">Organics / compost pickup</span>
+                <span class="stream-check-sub">Food scraps, green waste, compostable materials</span>
+              </div>
+            </label>
+            <label class="stream-check-opt" onclick="toggleStream('specialty')">
+              <div class="stream-check-box" id="chk-specialty">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 7 5.5 10.5 12 3"/></svg>
+              </div>
+              <div class="stream-check-text">
+                <span class="stream-check-label">Specialty / hazardous waste</span>
+                <span class="stream-check-sub">Grease traps, medical, chemicals, e-waste — all carry premiums</span>
+              </div>
+            </label>
+          </div>
+
+          <div class="stream-none-note">Not sure? Leave unchecked — general trash is the baseline.</div>
+          <button class="bm-next" id="next-4" onclick="nextStep(5)">Continue →</button>
+        </div>
+
+        <!-- Step 6: Monthly spend -->
+        <div class="bm-step" id="step-5">
           <div class="bm-q">What do you pay per month?</div>
           <div class="bm-hint">Check your last invoice — include base service charge plus all surcharges. Rough estimate is fine.</div>
           <div class="bm-input-wrap">
             <div class="bm-input-prefix">$</div>
             <input class="bm-input" type="number" id="spend-input" placeholder="e.g. 320" min="0" max="99999"
-                   oninput="onSpendInput()" onkeydown="if(event.key==='Enter') runBenchmark()" />
+                   oninput="onSpendInput()" onkeydown="if(event.key==='Enter' && answers.spend > 0) nextStep(6)" />
           </div>
-          <button class="bm-next" id="next-3" onclick="runBenchmark()" disabled>See my benchmark →</button>
+          <button class="bm-next" id="next-5" onclick="nextStep(6)" disabled>Continue →</button>
+        </div>
+
+
+
+
+        <!-- Step 7: Email gate -->
+        <div class="bm-step" id="step-6">
+          <div class="bm-q">Your benchmark is ready.</div>
+          <div class="bm-hint" id="email-context-hint">Enter your business email to see your full result — including how your spend compares against similar businesses in your region.</div>
+
+          <div class="bm-input-wrap" style="margin-bottom:.7rem">
+            <div class="bm-input-prefix">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="14" height="10" rx="1.5"/><polyline points="1,3 8,9.5 15,3"/></svg>
+            </div>
+            <input class="bm-input" type="email" id="email-input" placeholder="you@yourbusiness.com"
+                   oninput="onEmailInput()" onkeydown="if(event.key==='Enter') submitEmailAndRun()" />
+          </div>
+          <div class="email-privacy-note">
+            <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 1L2 2.5v3c0 2.2 1.5 4 3.5 4.7C7.5 9.5 9 7.7 9 5.5v-3L5.5 1z"/></svg>
+            No spam. No sales calls. Just your result.
+          </div>
+          <button class="bm-next" id="next-6" onclick="submitEmailAndRun()" disabled>See my benchmark →</button>
         </div>
 
         <!-- Result -->
@@ -776,7 +942,7 @@
                 <div class="result-cta-headline" id="cta-headline"></div>
                 <div class="result-cta-sub" id="cta-sub"></div>
               </div>
-              <a href="/audit" class="result-cta-btn">Full audit →</a>
+              <a href="/audit" class="result-cta-btn" id="result-cta-btn">Full audit →</a>
             </div>
 
             <div class="result-restart">
@@ -807,6 +973,7 @@
       <div class="how-num">02</div>
       <div class="how-title">Run your full audit</div>
       <div class="how-desc">Upload your invoice and describe your setup in detail. Our audit engine checks every line item, your container efficiency, your contract terms, and local programs you're missing.</div>
+      <div style="font-size:.72rem;color:var(--ink-faint);margin-top:.8rem;font-style:italic;">Your invoice is analyzed securely and never shared. Data is deleted after your audit is generated.</div>
       <div class="how-connector">→</div>
     </div>
     <div class="how-card reveal">
@@ -875,7 +1042,7 @@
     <a href="#features">What you get</a>
     <a href="/audit">Full Audit</a>
   </div>
-  <div class="footer-copy">© 2025 WasteHound · Powered by Claude Opus</div>
+  <div class="footer-copy">© 2025 WasteHound · Market data updated monthly</div>
 </footer>
 
 <script>
@@ -890,22 +1057,29 @@
   document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
 
   // ── Benchmarker state ──
-  const answers = { bizType: null, location: null, container: null, spend: null };
+  const answers = { bizType: null, location: null, container: null, pickup: null, spend: null };
   let currentStep = 0;
 
   function selectOpt(el, step) {
+    const key = ['bizType',null,'container','pickup'][step]; if(!key) return;
+    const isSelected = el.classList.contains('selected');
     const opts = el.closest('.bm-options').querySelectorAll('.bm-opt');
     opts.forEach(o => o.classList.remove('selected'));
-    el.classList.add('selected');
-    const key = ['bizType','location','container'][step];
-    answers[key] = el.dataset.val;
-    document.getElementById('next-' + step).disabled = false;
+    if (isSelected) {
+      // Deselect — clear answer and disable next
+      answers[key] = null;
+      document.getElementById('next-' + step).disabled = true;
+    } else {
+      el.classList.add('selected');
+      answers[key] = el.dataset.val;
+      document.getElementById('next-' + step).disabled = false;
+    }
   }
 
   function onSpendInput() {
     const val = parseFloat(document.getElementById('spend-input').value);
     answers.spend = val;
-    document.getElementById('next-3').disabled = !(val > 0);
+    document.getElementById('next-5').disabled = !(val > 0);
   }
 
   function nextStep(to) {
@@ -913,123 +1087,221 @@
     document.getElementById('step-' + to).classList.add('active');
     currentStep = to;
     updateProgress(to);
-    document.getElementById('bm-step-badge').textContent = `Step ${to + 1} of 4`;
+    document.getElementById('bm-step-badge').textContent = `Step ${to + 1} of 7`;
     setTimeout(() => {
       document.querySelector('.benchmarker').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      if (to === 6) {
+        const bizMap = { restaurant:'restaurant', grocery:'grocery', retail:'retail store', office:'office', hospitality:'hospitality', healthcare:'healthcare', manufacturing:'manufacturing', industrial:'industrial', other:'business' };
+        const regionMap = { northeast:'Northeast', west:'West', midwest:'Midwest', southeast:'Southeast', southwest:'Southwest' };
+        const biz = bizMap[answers.bizType] || 'business';
+        const region = regionMap[subAnswers.region] || 'your region';
+        document.getElementById('email-context-hint').textContent =
+          `Enter your business email to see your full result — including how your spend compares against similar ${biz} businesses in the ${region}.`;
+      }
     }, 80);
   }
 
   function updateProgress(step) {
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 7; i++) {
       const dot = document.getElementById('dot-' + i);
       dot.className = 'bm-prog-dot' + (i < step ? ' done' : i === step ? ' active' : '');
     }
   }
 
-  // ── Benchmark logic ──
-  // Market ranges: [low, median, high] per month
-  // Indexed by container size, adjusted by location and biz type
-  const BASE_RANGES = {
-    '32gal': [45, 70, 110],
-    '64gal': [65, 100, 150],
-    '96gal': [90, 135, 200],
-    '2yd':   [130, 200, 310],
-    '4yd':   [200, 300, 460],
-    '6yd':   [290, 430, 640],
-    '8yd':   [400, 580, 860],
+  // ── Stream checkbox logic ──
+  const streamState = { recycling: false, organics: false, specialty: false };
+
+  function toggleStream(key) {
+    streamState[key] = !streamState[key];
+    const opt = document.getElementById('chk-' + key).closest('.stream-check-opt');
+    opt.classList.toggle('checked', streamState[key]);
+  }
+
+  // ── Sub-option selection (region + density in step 1) ──
+  const subAnswers = { region: null, density: null };
+
+  function selectSubOpt(el, group) {
+    const opts = el.closest('.bm-options').querySelectorAll('.bm-opt');
+    opts.forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    subAnswers[group] = el.dataset.val;
+    answers.location = subAnswers; // keep reference
+    // Enable next only when both region and density are selected
+    const bothSelected = subAnswers.region && subAnswers.density;
+    document.getElementById('next-1').disabled = !bothSelected;
+  }
+
+  // ── Benchmark rate tables (v2) ──
+  const BASE_PER_PICKUP = {
+    '32gal':      [6,   10,  16],
+    '64gal':      [8,   14,  22],
+    '96gal':      [10,  18,  28],
+    '2yd':        [38,  58,  90],
+    '4yd':        [52,  80,  125],
+    '6yd':        [70,  108, 165],
+    '8yd':        [90,  140, 215],
+    'compactor_sm': [65, 100, 155],
+    'compactor_lg': [185,285, 435],
+    'rolloff_sm':  [225, 340, 475],
+    'rolloff_lg':  [350, 500, 675],
   };
 
-  const LOCATION_MULT = {
-    major_city: 1.25,
-    mid_city: 1.0,
-    suburb: 0.88,
-    rural: 0.78
+  const PICKUP_PER_MONTH = { '1':4.33, '2':8.67, '3':13.0, '5':21.67, '6':26.0 };
+
+  const REGION_MULT = {
+    northeast: 1.20,
+    west:      1.15,
+    southwest: 1.00,
+    midwest:   0.95,
+    southeast: 0.90
+  };
+
+  const DENSITY_MULT = {
+    major_city: 1.15,
+    mid_city:   1.00,
+    suburb:     0.90,
+    rural:      0.82
   };
 
   const BIZ_MULT = {
-    restaurant: 1.1,
-    retail: 0.95,
-    office: 0.85,
-    hospitality: 1.15,
-    industrial: 1.0,
-    other: 1.0
+    restaurant:    1.08,
+    grocery:       1.05,
+    retail:        0.95,
+    office:        0.88,
+    hospitality:   1.10,
+    healthcare:    1.12,
+    manufacturing: 1.05,
+    industrial:    1.00,
+    other:         1.00
   };
+
+  // Fee overhead [low, median, high]
+  const FEE_OVERHEAD = [1.12, 1.22, 1.35];
+
+  function wasteStreamMult() {
+    let m = 1.00;
+    if (streamState.recycling) m += 0.04;
+    if (streamState.organics)  m -= 0.03;
+    if (streamState.specialty) m += 0.15;
+    return Math.min(1.25, Math.max(0.90, m));
+  }
+
+
+  function onEmailInput() {
+    const val = document.getElementById('email-input').value.trim();
+    const valid = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(val);
+    document.getElementById('next-6').disabled = !valid;
+  }
+
+  function submitEmailAndRun() {
+    const email = document.getElementById('email-input').value.trim();
+    if (!email) return;
+    // Log email capture
+    fetch('/capture-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email,
+        source: 'benchmarker',
+        bizType: answers.bizType,
+        region: subAnswers.region,
+        density: subAnswers.density,
+        container: answers.container,
+        pickup: answers.pickup,
+        spend: answers.spend
+      })
+    }).catch(() => {}); // silent fail — don't block result
+    runBenchmark();
+  }
 
   function runBenchmark() {
     const spend = answers.spend;
     if (!spend || spend <= 0) return;
-
-    // Hide steps, show result loading
-    document.getElementById('step-3').classList.remove('active');
+    document.getElementById('step-6').classList.remove('active');
     document.getElementById('bm-result').classList.add('active');
     document.getElementById('result-loading').style.display = 'block';
     document.getElementById('result-card').style.display = 'none';
     document.getElementById('bm-step-badge').textContent = 'Your result';
-    updateProgress(4);
-
+    updateProgress(7);
     setTimeout(() => showResult(spend), 1200);
   }
 
   function showResult(spend) {
-    const base = BASE_RANGES[answers.container] || [150, 250, 400];
-    const locM = LOCATION_MULT[answers.location] || 1.0;
-    const bizM = BIZ_MULT[answers.bizType] || 1.0;
-    const mult = locM * bizM;
+    const perPickup = BASE_PER_PICKUP[answers.container] || [52, 80, 125];
+    const pickupsPerMonth = PICKUP_PER_MONTH[answers.pickup] || 8.67;
+    const regionM  = REGION_MULT[(subAnswers.region)] || 1.00;
+    const densityM = DENSITY_MULT[(subAnswers.density)] || 1.00;
+    const bizM     = BIZ_MULT[answers.bizType] || 1.00;
+    const streamM  = wasteStreamMult();
 
-    const low    = Math.round(base[0] * mult);
-    const median = Math.round(base[1] * mult);
-    const high   = Math.round(base[2] * mult);
-    const diff   = spend - median;
+    const baseMult = regionM * densityM * bizM * streamM;
+
+    const low    = Math.round(perPickup[0] * pickupsPerMonth * baseMult * FEE_OVERHEAD[0]);
+    const median = Math.round(perPickup[1] * pickupsPerMonth * baseMult * FEE_OVERHEAD[1]);
+    const high   = Math.round(perPickup[2] * pickupsPerMonth * baseMult * FEE_OVERHEAD[2]);
+
+    const diff    = spend - median;
     const diffPct = Math.round((diff / median) * 100);
-    const annual = Math.abs(Math.round(diff * 12));
+    const annual  = Math.abs(Math.round(diff * 12));
 
-    // Classify: over = >15% above median, slight = 5-15%, on = within 5%
+    // 4-tier verdict with specific CTA messaging per spec
     let cls, verdictHTML, ctaHeadline, ctaSub;
-    if (diffPct > 15) {
-      cls = 'over';
-      verdictHTML = `You're paying <span class="over">$${Math.round(Math.abs(diff))}/mo more</span> than market median.`;
-      ctaHeadline = 'Find out exactly why — and how to fix it.';
-      ctaSub = 'A full audit will identify the specific overcharges, inefficiencies, and next steps. Takes 5 minutes.';
-    } else if (diffPct > 5) {
+
+    if (spend <= median * 0.90) {
+      cls = 'on';
+      verdictHTML = `Your rate is <span class="on">below market median</span> — looks competitive.`;
+      ctaHeadline = 'Good rate. But are contract terms costing you?';
+      ctaSub = 'Auto-renewal escalators, locked rates, and termination penalties often cost more than the base rate itself. A full audit checks all three.';
+    } else if (spend <= median * 1.10) {
       cls = 'slight';
-      verdictHTML = `You're <span class="slight">slightly above</span> market median for your setup.`;
-      ctaHeadline = 'There may be room to negotiate.';
-      ctaSub = 'A full audit will check every line item and tell you if your contract has hidden rate escalators.';
-    } else if (diffPct >= -10) {
-      cls = 'on';
-      verdictHTML = `You're <span class="on">roughly in line</span> with market rates for your setup.`;
-      ctaHeadline = 'Good — but are you leaving money elsewhere?';
-      ctaSub = 'Container size, pickup frequency, and diversion programs can often save more than the base rate. Find out.';
+      verdictHTML = `You're <span class="slight">within normal range</span> of market median.`;
+      ctaHeadline = 'Most businesses still find 10–20% in savings they didn\'t expect.';
+      ctaSub = 'Inflated surcharges, over-provisioned containers, and missed diversion programs rarely show up in the base rate. A full audit surfaces them.';
+    } else if (spend <= median * 1.30) {
+      cls = 'over';
+      verdictHTML = `You may be <span class="over">overpaying by ~$${Math.round(Math.abs(diff))}/mo</span> vs. market median.`;
+      ctaHeadline = 'The three most common causes: auto-renewed contracts, inflated surcharges, and containers that are too big.';
+      ctaSub = 'A full audit will pinpoint exactly which applies to you and give you a step-by-step action plan to fix it.';
     } else {
-      cls = 'on';
-      verdictHTML = `You're <span class="on">paying below market</span> — your rate looks competitive.`;
-      ctaHeadline = 'Great rate. Let\'s make sure nothing else is off.';
-      ctaSub = 'A full audit checks surcharges, contract traps, and compliance issues that don\'t show up in the base rate.';
+      cls = 'over';
+      verdictHTML = `Your spend is <span class="over">$${Math.round(Math.abs(diff))}/mo above</span> the expected range — significant variance.`;
+      ctaHeadline = 'This level of variance almost always means contract escalators, unnecessary service frequency, or excessive fees.';
+      ctaSub = 'We strongly recommend a full audit. This is exactly the situation WasteHound was built for.';
     }
 
-    // Bar position: clamp user spend to 0-100% of 0 → high*1.5 range
-    const barMax = high * 1.5;
-    const fillPct = Math.min(100, Math.round((spend / barMax) * 100));
-    const markerPct = Math.min(100, Math.round((spend / barMax) * 100));
+    // Bar: show range band with user marker
+    const barMax = high * 1.4;
+    const lowPct    = Math.min(98, Math.round((low    / barMax) * 100));
+    const highPct   = Math.min(98, Math.round((high   / barMax) * 100));
+    const markerPct = Math.min(98, Math.round((spend  / barMax) * 100));
 
     document.getElementById('result-verdict').innerHTML = verdictHTML;
     document.getElementById('result-range').textContent =
-      `Market range for a ${containerLabel(answers.container)} in a ${locationLabel(answers.location)} ${bizLabel(answers.bizType)}: $${low}–$${high}/mo. Median: $${median}/mo.`;
+      `Expected range for your profile: $${low.toLocaleString()}–$${high.toLocaleString()}/mo. Median: $${median.toLocaleString()}/mo.`;
 
+    // Draw range band on bar
+    const track = document.getElementById('result-bar');
+    track.innerHTML = `
+      <div style="position:absolute;left:${lowPct}%;width:${highPct-lowPct}%;height:100%;background:var(--forest-pale);border-radius:4px;"></div>
+      <div id="bar-marker" class="result-bar-marker ${cls}" style="left:${markerPct}%"></div>
+    `;
+
+    // Hide old fill element references gracefully
     const fill = document.getElementById('bar-fill');
+    if (fill) fill.style.display = 'none';
+
     const marker = document.getElementById('bar-marker');
-    fill.className = `result-bar-fill ${cls}`;
-    marker.className = `result-bar-marker ${cls}`;
+    if (marker) { marker.className = `result-bar-marker ${cls}`; }
 
     document.getElementById('insight-you').textContent = `$${spend.toLocaleString()}/mo`;
-    document.getElementById('insight-market').textContent = `$${median}/mo`;
+    document.getElementById('insight-market').textContent = `$${median.toLocaleString()}/mo`;
 
     const diffEl = document.getElementById('insight-diff');
     if (diff > 0) {
-      diffEl.textContent = `+$${Math.round(diff)}/mo`;
+      diffEl.textContent = `+$${Math.round(diff).toLocaleString()}/mo`;
       diffEl.className = 'result-insight-value red';
     } else if (diff < 0) {
-      diffEl.textContent = `-$${Math.round(Math.abs(diff))}/mo`;
+      diffEl.textContent = `-$${Math.round(Math.abs(diff)).toLocaleString()}/mo`;
       diffEl.className = 'result-insight-value green';
     } else {
       diffEl.textContent = 'At median';
@@ -1037,47 +1309,73 @@
     }
 
     document.getElementById('insight-annual').textContent =
-      diff > 0 ? `$${annual.toLocaleString()} overpaid` : `$${annual.toLocaleString()} under market`;
+      diff > 0 ? `$${annual.toLocaleString()} overpaid/yr` : `$${annual.toLocaleString()} under market/yr`;
 
     document.getElementById('cta-headline').textContent = ctaHeadline;
     document.getElementById('cta-sub').textContent = ctaSub;
 
+    // Build pre-fill URL for audit form
+    const auditParams = new URLSearchParams({
+      biz:     answers.bizType || '',
+      spend:   spend || '',
+      region:  subAnswers.region || '',
+      density: subAnswers.density || '',
+      container: answers.container || '',
+      pickup:  answers.pickup || '',
+      email:   document.getElementById('email-input')?.value?.trim() || '',
+    });
+    document.getElementById('result-cta-btn').href = '/audit?' + auditParams.toString();
+
     document.getElementById('result-loading').style.display = 'none';
     document.getElementById('result-card').style.display = 'block';
 
-    // Animate bar after paint
     requestAnimationFrame(() => {
       setTimeout(() => {
-        fill.style.width = fillPct + '%';
-        marker.style.left = markerPct + '%';
+        if (marker) marker.style.left = markerPct + '%';
       }, 50);
     });
   }
 
   function containerLabel(v) {
-    const map = { '32gal':'32-gal toter','64gal':'64-gal toter','96gal':'96-gal toter','2yd':'2-yd dumpster','4yd':'4-yd dumpster','6yd':'6-yd dumpster','8yd':'8-yd+ dumpster' };
+    const map = {
+      '32gal':'32-gal cart','64gal':'64-gal cart','96gal':'96-gal cart',
+      '2yd':'2-yd dumpster','4yd':'4-yd dumpster','6yd':'6-yd dumpster','8yd':'8-yd dumpster',
+      'compactor_sm':'compactor','compactor_lg':'self-contained compactor',
+      'rolloff_sm':'10–20 yd roll-off','rolloff_lg':'30–40 yd roll-off'
+    };
     return map[v] || 'container';
   }
   function locationLabel(v) {
-    const map = { major_city:'major city', mid_city:'mid-size city', suburb:'suburb', rural:'rural area' };
-    return map[v] || 'area';
+    const region = subAnswers.region || '';
+    const density = subAnswers.density ? subAnswers.density.replace('_',' ') : '';
+    return `${density} (${region})`;
   }
   function bizLabel(v) {
-    const map = { restaurant:'restaurant', retail:'retail business', office:'office', hospitality:'hospitality business', industrial:'industrial facility', other:'business' };
+    const map = { restaurant:'restaurant', grocery:'grocery', retail:'retail', office:'office', hospitality:'hospitality', healthcare:'healthcare', manufacturing:'manufacturing', industrial:'industrial', other:'business' };
     return map[v] || 'business';
   }
 
   function restartWidget() {
-    answers.bizType = null; answers.location = null; answers.container = null; answers.spend = null;
+    answers.bizType = null; answers.location = null; answers.container = null; answers.pickup = null; answers.spend = null;
+    subAnswers.region = null; subAnswers.density = null;
+    streamState.recycling = false; streamState.organics = false; streamState.specialty = false;
+    ['recycling','organics','specialty'].forEach(k => { document.getElementById('chk-'+k).closest('.stream-check-opt').classList.remove('checked'); });
     document.getElementById('bm-result').classList.remove('active');
     document.querySelectorAll('.bm-step').forEach(s => s.classList.remove('active'));
     document.getElementById('step-0').classList.add('active');
     document.querySelectorAll('.bm-opt').forEach(o => o.classList.remove('selected'));
     document.querySelectorAll('.bm-next').forEach(b => b.disabled = true);
     document.getElementById('spend-input').value = '';
+    const emailIn = document.getElementById('email-input'); if(emailIn) emailIn.value = '';
+    document.getElementById('next-6').disabled = true;
+
+
+
+
+
     currentStep = 0;
     updateProgress(0);
-    document.getElementById('bm-step-badge').textContent = 'Step 1 of 4';
+    document.getElementById('bm-step-badge').textContent = 'Step 1 of 7';
   }
 </script>
 </body>
