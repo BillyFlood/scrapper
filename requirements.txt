@@ -1,6 +1,5 @@
-flask
 anthropic
-pypdf
+flask
 gunicorn
-python-dotenv
-Pillow
+pypdf
+stripe
