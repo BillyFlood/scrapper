@@ -3,14 +3,15 @@ import uuid
 import base64
 import json
 import logging
+import stripe
 from datetime import datetime
-from flask import Flask, request, render_template, Response, stream_with_context
+from flask import Flask, request, render_template, Response, stream_with_context, redirect
 import anthropic
 from pypdf import PdfReader
 from pathlib import Path
 
 # ── App setup ──
-app = Flask(__name__, template_folder=os.path.join(os.path.dirname(__file__), 'templates'))
+app = Flask(__name__, template_folder=os.path.join(os.path.dirname(__file__), 'Templates'))
 UPLOAD_FOLDER = 'uploads'
 LOG_FOLDER = 'logs'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -40,6 +41,19 @@ _jobs = {}
 # ── Anthropic client ──
 client = anthropic.Anthropic()  # reads ANTHROPIC_API_KEY automatically
 
+# ── Stripe ──
+stripe.api_key = os.environ.get('STRIPE_SECRET_KEY', '')
+STRIPE_PRICE_ID = os.environ.get('STRIPE_PRICE_ID', '')        # create a $49 one-time price in Stripe dashboard
+STRIPE_WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET', '')
+
+# ── Promo codes (comma-separated in env var, e.g. "BETA2025,TESTER1,BILLY") ──
+def get_promo_codes():
+    raw = os.environ.get('PROMO_CODES', 'WASTEHOUND_BETA')
+    return [c.strip().upper() for c in raw.split(',') if c.strip()]
+
+def is_valid_promo(code):
+    return code.upper() in get_promo_codes()
+
 
 # ── Helpers ──
 def extract_text_from_pdf(filepath):
@@ -58,67 +72,42 @@ def encode_image_to_base64(filepath):
         return base64.standard_b64encode(f.read()).decode("utf-8")
 
 
+def _parse_containers(json_str):
+    """Parse containers_json into a readable string for Claude."""
+    import json as _json
+    try:
+        containers = _json.loads(json_str or '[]')
+        if not containers:
+            return 'Not provided'
+        parts = []
+        for i, c in enumerate(containers, 1):
+            size = c.get('size', '')
+            freq = c.get('freq', '')
+            if size or freq:
+                parts.append(f"Container {i}: {size or 'unknown size'}, {freq or 'unknown frequency'}")
+        return '\n  '.join(parts) if parts else 'Not provided'
+    except Exception:
+        return 'Not provided'
+
+
 def build_user_data(form_data):
-    """Map form fields into a structured <user_data> block for Claude."""
-
-    # Collect all waste stream rows
-    stream_types = request.form.getlist('stream_type')
-    container_types = request.form.getlist('container_type')
-    container_sizes = request.form.getlist('container_size')
-    container_counts = request.form.getlist('container_count')
-    pickup_freqs = request.form.getlist('pickup_frequency')
-    fill_levels = request.form.getlist('fill_level')
-    compactions = request.form.getlist('compaction')
-
-    streams_text = ""
-    for i in range(len(stream_types)):
-        streams_text += f"""
-    Stream {i+1}:
-      - Type: {stream_types[i] if i < len(stream_types) else 'N/A'}
-      - Container: {container_types[i] if i < len(container_types) else 'N/A'}
-      - Size: {container_sizes[i] if i < len(container_sizes) else 'N/A'}
-      - Count: {container_counts[i] if i < len(container_counts) else 'N/A'}
-      - Pickups/week: {pickup_freqs[i] if i < len(pickup_freqs) else 'N/A'}
-      - Fill level: {fill_levels[i] if i < len(fill_levels) else 'N/A'}
-      - Compacted: {compactions[i] if i < len(compactions) else 'N/A'}"""
-
+    """Map lean form fields into a structured <user_data> block."""
     return f"""<user_data>
 
 <BUSINESS_PROFILE>
-  Business Name: {form_data.get('business_name', 'Not provided')}
   Business Type: {form_data.get('business_type', 'Not provided')}
   Location: {form_data.get('location', 'Not provided')}
-  Employees: {form_data.get('employees', 'Not provided')}
-  Square Footage: {form_data.get('square_footage', 'Not provided')}
-  Operating Days/Week: {form_data.get('operating_days', 'Not provided')}
 </BUSINESS_PROFILE>
 
 <WASTE_SERVICE_SETUP>
-  Waste Hauler: {form_data.get('waste_hauler', 'Not provided')}
   Monthly Spend: ${form_data.get('monthly_spend', 'Not provided')}
-  Waste Streams:
-{streams_text}
+  Waste Hauler: {form_data.get('waste_hauler', 'Not provided')}
+  Containers: {_parse_containers(form_data.get('containers_json', '[]'))}
 </WASTE_SERVICE_SETUP>
 
 <CONTRACT_INFO>
-  Contract Start: {form_data.get('contract_start_date', 'Not provided')}
   Contract End/Renewal: {form_data.get('contract_end_date', 'Not provided')}
-  Auto-Renewal Clause: {form_data.get('auto_renewal', 'Not provided')}
-  Early Termination Penalty: {form_data.get('early_termination', 'Not provided')}
-  Rate Type: {form_data.get('rate_type', 'Not provided')}
 </CONTRACT_INFO>
-
-<WASTE_COMPOSITION>
-  Top Waste Materials: {form_data.get('top_waste_materials', 'Not provided')}
-  Contamination Issues: {form_data.get('contamination', 'Not provided')}
-</WASTE_COMPOSITION>
-
-<GOALS_AND_PREFERENCES>
-  Primary Goal: {form_data.get('primary_goal', 'Not provided')}
-  Open to Switching Haulers: {form_data.get('open_to_switching', 'Not provided')}
-  Program Budget: {form_data.get('program_budget', 'Not provided')}
-  Existing Initiatives: {form_data.get('existing_initiatives', 'Not provided')}
-</GOALS_AND_PREFERENCES>
 
 <ADDITIONAL_NOTES>
 {form_data.get('additional_notes', 'None provided')}
@@ -128,7 +117,7 @@ def build_user_data(form_data):
 
 
 def build_message_content(user_data_block, invoice_path, invoice_filename):
-    """Build the Claude message content array."""
+    """Build the message content array."""
     message_content = []
 
     if invoice_path and os.path.exists(invoice_path):
@@ -311,27 +300,16 @@ def submit():
     session_id = str(uuid.uuid4())[:8]
 
     form_data = {
-        'business_name':       request.form.get('business_name', ''),
-        'business_type':       request.form.get('business_type', ''),
-        'location':            request.form.get('location', ''),
-        'employees':           request.form.get('employees', ''),
-        'square_footage':      request.form.get('square_footage', ''),
-        'operating_days':      request.form.get('operating_days', ''),
-        'waste_hauler':        request.form.get('waste_hauler', ''),
-        'monthly_spend':       request.form.get('monthly_spend', ''),
-        'contract_start_date': request.form.get('contract_start_date', ''),
-        'contract_end_date':   request.form.get('contract_end_date', ''),
-        'auto_renewal':        request.form.get('auto_renewal', ''),
-        'early_termination':   request.form.get('early_termination', ''),
-        'rate_type':           request.form.get('rate_type', ''),
-        'top_waste_materials': request.form.get('top_waste_materials', ''),
-        'contamination':       request.form.get('contamination', ''),
-        'primary_goal':        request.form.get('primary_goal', ''),
-        'open_to_switching':   request.form.get('open_to_switching', ''),
-        'program_budget':      request.form.get('program_budget', ''),
-        'existing_initiatives':request.form.get('existing_initiatives', ''),
-        'additional_notes':    request.form.get('additional_notes', ''),
-        'email':               request.form.get('email', '').strip(),
+        'business_type':    request.form.get('business_type', ''),
+        'location':         request.form.get('location', ''),
+        'monthly_spend':    request.form.get('monthly_spend', ''),
+        'email':            request.form.get('email', '').strip(),
+        # Optional accordion fields
+        'waste_hauler':     request.form.get('waste_hauler', ''),
+        'containers_json':  request.form.get('containers_json', '[]'),
+        'contract_end_date':request.form.get('contract_end_date', ''),
+        'additional_notes': request.form.get('additional_notes', ''),
+        'promo_code':      request.form.get('promo_code', '').strip(),
     }
 
     # Handle invoice upload
@@ -344,13 +322,12 @@ def submit():
         invoice_file.save(invoice_path)
 
     # Log the incoming submission
-    logger.info(f"[{session_id}] New audit: {form_data['business_name']} | {form_data['business_type']} | {form_data['location']} | email: {form_data.get('email') or 'none'}")
+    logger.info(f"[{session_id}] New audit: {form_data['business_type']} | {form_data['location']} | ${form_data['monthly_spend']}/mo | email: {form_data.get('email') or 'none'}")
     log_session(session_id, "submission", {
-        "business_name": form_data['business_name'],
         "business_type": form_data['business_type'],
         "location": form_data['location'],
         "monthly_spend": form_data['monthly_spend'],
-        "waste_hauler": form_data['waste_hauler'],
+        "waste_hauler": form_data.get('waste_hauler', ''),
         "email": form_data.get('email', ''),
         "invoice_uploaded": invoice_filename is not None,
         "form_data": form_data
@@ -363,19 +340,46 @@ def submit():
     token = str(uuid.uuid4())
     _jobs[token] = {
         "session_id": session_id,
-        "business_name": form_data['business_name'],
+        "business_name": form_data.get('business_type', 'Business') + ' · ' + form_data.get('location', ''),
         "message_content": message_content
     }
 
-    return render_template('results.html',
-                           business_name=form_data['business_name'],
-                           token=token,
-                           email_provided=bool(form_data.get('email', '')))
+    display_name = f"{form_data['business_type']} · {form_data['location']}" if form_data.get('location') else form_data['business_type']
+
+    # ── Check promo code ──
+    promo = form_data.get('promo_code', '').strip()
+    if promo and is_valid_promo(promo):
+        logger.info(f"[{session_id}] Promo code accepted: {promo}")
+        log_session(session_id, "promo_used", {"promo_code": promo})
+        return render_template('results.html',
+                               business_name=display_name,
+                               token=token,
+                               email_provided=bool(form_data.get('email', '')))
+
+    # ── Gate behind Stripe payment ──
+    try:
+        checkout = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[{
+                'price': STRIPE_PRICE_ID,
+                'quantity': 1,
+            }],
+            mode='payment',
+            success_url=request.host_url + f'results/{token}?paid=1',
+            cancel_url=request.host_url + 'audit?cancelled=1',
+            metadata={'token': token, 'session_id': session_id},
+            customer_email=form_data.get('email') or None,
+        )
+        log_session(session_id, "checkout_created", {"stripe_session": checkout.id})
+        return redirect(checkout.url, code=303)
+    except Exception as e:
+        logger.error(f"[{session_id}] Stripe error: {e}")
+        return render_template('error.html', error_message=f"Payment setup failed: {str(e)}")
 
 
 @app.route('/stream/<token>')
 def stream(token):
-    """SSE endpoint — streams Claude response chunk by chunk."""
+    """SSE endpoint — streams response chunk by chunk."""
 
     if token not in _jobs:
         def err():
@@ -390,7 +394,7 @@ def stream(token):
     def generate():
         full_response = ""
         try:
-            logger.info(f"[{session_id}] Starting Claude stream for: {business_name}")
+            logger.info(f"[{session_id}] Starting stream for: {business_name}")
 
             with client.messages.stream(
                 model="claude-opus-4-6",
@@ -440,6 +444,35 @@ def capture_email():
             "source": source
         })
     return jsonify({"ok": True})
+
+
+
+@app.route('/stripe-webhook', methods=['POST'])
+def stripe_webhook():
+    """Handle Stripe payment confirmation events."""
+    payload = request.get_data()
+    sig_header = request.headers.get('Stripe-Signature', '')
+    try:
+        if STRIPE_WEBHOOK_SECRET:
+            event = stripe.Webhook.construct_event(payload, sig_header, STRIPE_WEBHOOK_SECRET)
+        else:
+            event = stripe.Event.construct_from(json.loads(payload), stripe.api_key)
+
+        if event['type'] == 'checkout.session.completed':
+            session_data = event['data']['object']
+            token = session_data.get('metadata', {}).get('token', '')
+            sid = session_data.get('metadata', {}).get('session_id', '')
+            logger.info(f"[{sid}] Payment confirmed for token: {token}")
+            log_session(sid, "payment_confirmed", {
+                "stripe_session": session_data.get('id'),
+                "amount": session_data.get('amount_total'),
+                "customer_email": session_data.get('customer_email'),
+            })
+    except Exception as e:
+        logger.error(f"Webhook error: {e}")
+        return 'error', 400
+
+    return 'ok', 200
 
 
 # ── Admin page ──
