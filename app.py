@@ -12,7 +12,7 @@ from pathlib import Path
 
 # ── App setup ──
 
-app = Flask(**name**, template_folder=os.path.join(os.path.dirname(**file**), ‘templates’))
+app = Flask(**name**, template_folder=os.path.join(os.path.dirname(**file**), ‘Templates’))
 UPLOAD_FOLDER = ‘uploads’
 LOG_FOLDER = ‘logs’
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
