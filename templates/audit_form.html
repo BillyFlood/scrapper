@@ -416,6 +416,13 @@
     <!-- Required fields card -->
     <div class="form-card">
 
+      <!-- Business name -->
+      <div class="field">
+        <label for="business_name">Business name</label>
+        <input type="text" name="business_name" id="business_name"
+               placeholder="e.g. Blue Sparrow Café" required />
+      </div>
+
       <!-- Business type -->
       <div class="field">
         <label for="business_type">Business type</label>
@@ -690,25 +697,83 @@
 
   // ── Pre-fill from benchmarker URL params ──
   const params = new URLSearchParams(window.location.search);
-  const prefill = {
-    business_type: params.get('biz'),
-    monthly_spend: params.get('spend'),
-    email:         params.get('email'),
-  };
 
-  if (prefill.business_type) {
+  // Business type — match against select options
+  const bizParam = params.get('biz');
+  if (bizParam) {
+    const bizMap = {
+      restaurant: 'Restaurant / Café',
+      grocery: 'Grocery / Food Market',
+      retail: 'Retail Store',
+      office: 'Office / Professional Services',
+      hospitality: 'Hotel / Hospitality',
+      healthcare: 'Healthcare / Medical / Dental',
+      manufacturing: 'Manufacturing',
+      industrial: 'Warehouse / Distribution',
+      other: 'Other',
+    };
+    const mapped = bizMap[bizParam] || bizParam;
     const sel = document.getElementById('business_type');
     for (let opt of sel.options) {
-      if (opt.value.toLowerCase().startsWith(prefill.business_type.toLowerCase())) {
+      if (opt.value === mapped || opt.text === mapped) {
         opt.selected = true; break;
       }
     }
   }
-  if (prefill.monthly_spend) {
-    document.getElementById('monthly_spend').value = prefill.monthly_spend;
-  }
-  if (prefill.email) {
-    document.getElementById('email').value = prefill.email;
+
+  // Monthly spend
+  const spendParam = params.get('spend');
+  if (spendParam) document.getElementById('monthly_spend').value = spendParam;
+
+  // Email
+  const emailParam = params.get('email');
+  if (emailParam) document.getElementById('email').value = emailParam;
+
+  // Container — pre-select in accordion if provided
+  const containerParam = params.get('container');
+  if (containerParam) {
+    const containerMap = {
+      '32gal': '32-gallon cart', '64gal': '64-gallon cart', '96gal': '96-gallon cart',
+      '2yd': '2-yard dumpster', '4yd': '4-yard dumpster',
+      '6yd': '6-yard dumpster', '8yd': '8-yard dumpster',
+      'compactor_sm': '2–4 yard compactor', 'compactor_lg': 'Self-contained compactor (20–30 yd)',
+      'rolloff_sm': '10–20 yard roll-off', 'rolloff_lg': '30–40 yard roll-off',
+    };
+    const mappedContainer = containerMap[containerParam];
+    const pickupParam = params.get('pickup');
+    const pickupMap = {
+      '1': '1x per week', '2': '2x per week', '3': '3x per week',
+      '5': '5x per week', '6': '6x per week (daily)',
+    };
+    const mappedPickup = pickupMap[pickupParam] || '';
+
+    // Pre-fill the first bin row that gets added on load
+    // We wait a tick for the bin row to render
+    setTimeout(() => {
+      const sizeSelect = document.getElementById('bin-size-1');
+      const freqSelect = document.getElementById('bin-freq-1');
+      if (sizeSelect && mappedContainer) {
+        for (let opt of sizeSelect.options) {
+          if (opt.text === mappedContainer) { opt.selected = true; break; }
+        }
+      }
+      if (freqSelect && mappedPickup) {
+        for (let opt of freqSelect.options) {
+          if (opt.text === mappedPickup) { opt.selected = true; break; }
+        }
+      }
+      updateBins();
+    }, 100);
+
+    // Auto-open accordion if container data was passed
+    if (mappedContainer || mappedPickup) {
+      setTimeout(() => {
+        const accordion = document.getElementById('accordion');
+        if (accordion && !accordion.classList.contains('open')) {
+          toggleAccordion();
+        }
+      }, 150);
+    }
   }
 
   // ── File upload ──
