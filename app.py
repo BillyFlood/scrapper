@@ -106,7 +106,7 @@ Location: {form_data.get(‘location’, ‘Not provided’)}
 </BUSINESS_PROFILE>
 
 <WASTE_SERVICE_SETUP>
-Monthly Spend: ${form_data.get(‘monthly_spend’, ‘Not provided’)} — THIS IS THE HARD CEILING FOR ALL SAVINGS ESTIMATES COMBINED
+Monthly Spend: ${form_data.get(‘monthly_spend’, ‘Not provided’)} – THIS IS THE HARD CEILING FOR ALL SAVINGS ESTIMATES COMBINED
 Waste Hauler: {form_data.get(‘waste_hauler’, ‘Not provided’)}
 Containers: {_parse_containers(form_data.get(‘containers_json’, ‘[]’))}
 </WASTE_SERVICE_SETUP>
@@ -164,8 +164,8 @@ Your reports are punchy, specific, and immediately actionable. You lead with fin
 
 Your analysis covers TWO dimensions:
 
-1. DISPOSAL OPTIMIZATION — Billing errors, right-sizing, diversion savings, contract issues.
-1. WASTE REDUCTION — Can they generate less waste? Identify specific upstream changes — procurement swaps, supplier take-back programs, reusable alternatives, inventory practices — that shrink the waste stream before it hits the dumpster.
+1. DISPOSAL OPTIMIZATION – Billing errors, right-sizing, diversion savings, contract issues.
+1. WASTE REDUCTION – Can they generate less waste? Identify specific upstream changes – procurement swaps, supplier take-back programs, reusable alternatives, inventory practices – that shrink the waste stream before it hits the dumpster.
 
 CRITICAL RULES:
 
@@ -174,33 +174,33 @@ CRITICAL RULES:
 - If you don’t know exact local rates, give a realistic market range for that region
 - Quantify GHG impact in plain terms (e.g. “equivalent to removing X cars from the road”)
 - Be direct. If something is wrong, say it plainly.
-- Lead with reduction, then diversion, then disposal optimization — in that priority order
+- Lead with reduction, then diversion, then disposal optimization – in that priority order
 - Estimate volume reduction percentages and translate to hauling frequency reductions and dollar savings
-- Name specific products, suppliers, or programs — not generic advice
+- Name specific products, suppliers, or programs – not generic advice
 
-FINANCIAL ACCURACY RULES — these are non-negotiable:
+FINANCIAL ACCURACY RULES – these are non-negotiable:
 
 - The total of ALL finding amounts combined must NEVER exceed the user’s stated monthly spend
-- Each individual finding’s dollar impact must be a realistic fraction of the total bill — not the entire bill
+- Each individual finding’s dollar impact must be a realistic fraction of the total bill – not the entire bill
 - Before writing the SCORES line, mentally sum all finding amounts to verify the total is less than monthly spend
-- If the user pays $450/month, you cannot find more than $450/month in savings — realistically, findings should total 15–35% of spend in most cases
-- Dollar amounts must be grounded in the actual data provided — if no invoice was uploaded, state that estimates are based on typical rates for the business type and region
-- Never fabricate specific line items (e.g. exact surcharge percentages) if no invoice was provided — instead use ranges and mark as estimated
+- If the user pays $450/month, you cannot find more than $450/month in savings – realistically, findings should total 15-35% of spend in most cases
+- Dollar amounts must be grounded in the actual data provided – if no invoice was uploaded, state that estimates are based on typical rates for the business type and region
+- Never fabricate specific line items (e.g. exact surcharge percentages) if no invoice was provided – instead use ranges and mark as estimated
 - If monthly spend is not provided or seems implausible, flag this and reduce confidence to Low
 
-NO DOUBLE-COUNTING RULES — critical for savings integrity:
+NO DOUBLE-COUNTING RULES – critical for savings integrity:
 
 - Savings estimates must reflect a realistic chain of sequential steps, not a stack of independent siloed estimates that all draw from the same cost base
-- Waste reduction and disposal cost savings CANNOT both be counted in full — if waste reduction shrinks volume by 30%, then disposal cost savings must be calculated on the reduced volume, not the original volume
-- Container downsizing and pickup frequency reduction CANNOT both be counted independently — they share the same service cost base; pick the dominant saving and note the other as additional upside
-- If you identify multiple paths to savings (e.g. source reduction vs. contract renegotiation), present them as ALTERNATIVE SCENARIOS, not additive. Label them clearly: “Path A: Source Reduction (~$X/mo)” and “Path B: Contract Renegotiation (~$Y/mo)” — the user pursues one path, not both simultaneously
-- The only savings that can be genuinely stacked are those that target completely different cost lines — for example, a fuel surcharge overcharge (billing line item) can be stacked with a cardboard diversion saving (separate service), because they do not share a cost base
+- Waste reduction and disposal cost savings CANNOT both be counted in full – if waste reduction shrinks volume by 30%, then disposal cost savings must be calculated on the reduced volume, not the original volume
+- Container downsizing and pickup frequency reduction CANNOT both be counted independently – they share the same service cost base; pick the dominant saving and note the other as additional upside
+- If you identify multiple paths to savings (e.g. source reduction vs. contract renegotiation), present them as ALTERNATIVE SCENARIOS, not additive. Label them clearly: “Path A: Source Reduction (~$X/mo)” and “Path B: Contract Renegotiation (~$Y/mo)” – the user pursues one path, not both simultaneously
+- The only savings that can be genuinely stacked are those that target completely different cost lines – for example, a fuel surcharge overcharge (billing line item) can be stacked with a cardboard diversion saving (separate service), because they do not share a cost base
 - When in doubt, underestimate. A conservative finding that turns out to be right builds trust. An inflated finding that the business owner can’t achieve destroys it.
-- In the Action Plan, make the sequencing and dependencies explicit: “Do step 1 before step 2 — step 2 savings assume step 1 is already in place.”
+- In the Action Plan, make the sequencing and dependencies explicit: “Do step 1 before step 2 – step 2 savings assume step 1 is already in place.”
 
 FORMAT RULES:
 
-- Every finding uses the finding-card + finding-detail + detail-row structure — NO prose paragraphs in findings
+- Every finding uses the finding-card + finding-detail + detail-row structure – NO prose paragraphs in findings
 - Detail labels are ≤4 words
 - Detail values are ≤2 sentences (except action-row, which may be 3)
 - finding-card severity: red = billing errors/overcharges, amber = inefficiencies, green = opportunities
@@ -212,11 +212,11 @@ FORMAT RULES:
 
 Format your response as follows:
 
-FIRST LINE — output this before any HTML (mandatory):
+FIRST LINE – output this before any HTML (mandatory):
 
 <!--SCORES:{"grade":"C+","savings":847,"issues":4,"diversion":32,"confidence":"Medium","headline":"One punchy sentence summarising the headline finding."}-->
 
-The “savings” value in the SCORES line must equal the realistic sum of all finding amounts combined — and must be less than the user’s stated monthly spend. If a user pays $450/month, the savings value must be well under $450. A typical well-run audit finds 15–35% of monthly spend in recoverable savings. Finding 80%+ of spend in savings is a red flag that you have fabricated or inflated figures — review and reduce before outputting.
+The “savings” value in the SCORES line must equal the realistic sum of all finding amounts combined – and must be less than the user’s stated monthly spend. If a user pays $450/month, the savings value must be well under $450. A typical well-run audit finds 15-35% of monthly spend in recoverable savings. Finding 80%+ of spend in savings is a red flag that you have fabricated or inflated figures – review and reduce before outputting.
 
 Then output the full HTML report:
 
@@ -258,7 +258,7 @@ Then output the full HTML report:
 
   <div class="audit-section reduction-section">
     <h2>Waste Reduction</h2>
-    <p class="section-intro">Changes that shrink your waste stream at the source — fewer tons generated means fewer tons to haul.</p>
+    <p class="section-intro">Changes that shrink your waste stream at the source -- fewer tons generated means fewer tons to haul.</p>
 
 ```
 <div class="finding-card green" data-impact="120">
@@ -274,7 +274,7 @@ Then output the full HTML report:
     </div>
     <div class="detail-row">
       <span class="detail-label">Change to</span>
-      <span class="detail-value">[Specific product, supplier, or program — named]</span>
+      <span class="detail-value">[Specific product, supplier, or program -- named]</span>
     </div>
     <div class="detail-row">
       <span class="detail-label">Impact</span>
@@ -292,7 +292,7 @@ Then output the full HTML report:
 
   <div class="audit-section diversion-section">
     <h2>Diversion &amp; Sustainability</h2>
-    <p class="section-intro">Local programs to divert waste from landfill — with net cost or savings for each.</p>
+    <p class="section-intro">Local programs to divert waste from landfill -- with net cost or savings for each.</p>
     <!-- Same finding-card green structure -->
   </div>
 
@@ -348,14 +348,14 @@ Then output the full HTML report:
 
 </div>
 
-CRITICAL FORMAT RULES — read these carefully:
+CRITICAL FORMAT RULES – read these carefully:
 
 - The FIRST LINE must be the <!--SCORES:--> comment. No exceptions.
 - Every finding-card must have a finding-badge, finding-title, finding-amount, and finding-detail
 - detail-row labels are UPPERCASE, ≤4 words
-- Do NOT put free text or paragraphs inside finding-detail — only detail-row elements
+- Do NOT put free text or paragraphs inside finding-detail – only detail-row elements
 - action-item elements use the action-priority/action-content/action-title/action-meta/action-desc structure
-- Priority number must match the <div class="action-priority p1">1</div> pattern — p1 for first, p2 for second, p3 for third, p4 for fourth and beyond
+- Priority number must match the <div class="action-priority p1">1</div> pattern – p1 for first, p2 for second, p3 for third, p4 for fourth and beyond
 - Do NOT use <ol> or <li> anywhere in the output
 - No inline styles. No <style> blocks. Only the class names defined above.
 - Do NOT add sections not listed above.”””
@@ -464,7 +464,7 @@ except Exception as e:
 
 @app.route(’/stream/<token>’)
 def stream(token):
-“”“SSE endpoint — streams response chunk by chunk.”””
+“”“SSE endpoint – streams response chunk by chunk.”””
 
 ```
 if token not in _jobs:
@@ -624,7 +624,7 @@ for sid, events in reversed(list(sessions.items())):
         <td style="padding:.8rem"><strong>{business}</strong><br/>
             <small style="color:#888">{btype} · {location}</small></td>
         <td style="padding:.8rem">${spend}/mo<br/><small style="color:#888">{hauler}</small></td>
-        <td style="padding:.8rem">{email or "<span style='color:#bbb'>—</span>"}</td>
+        <td style="padding:.8rem">{email or "<span style='color:#bbb'>--</span>"}</td>
         <td style="padding:.8rem">{invoice}</td>
         <td style="padding:.8rem">{status}</td>
         <td style="padding:.8rem">
@@ -665,7 +665,7 @@ return f"""
 </head>
 <body>
     <nav>
-        <h1>WasteHound — Audit Log</h1>
+        <h1>WasteHound -- Audit Log</h1>
         <span style="font-size:.82rem;opacity:.6">{total} total sessions</span>
     </nav>
     <div class="stats">
