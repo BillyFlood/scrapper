@@ -11,7 +11,7 @@ from pypdf import PdfReader
 from pathlib import Path
 
 # ── App setup ──
-app = Flask(__name__, template_folder=os.path.join(os.path.dirname(__file__), 'templates'))
+app = Flask(__name__, template_folder=os.path.join(os.path.dirname(__file__), 'Templates'))
 UPLOAD_FOLDER = 'uploads'
 LOG_FOLDER = 'logs'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -95,6 +95,7 @@ def build_user_data(form_data):
     return f"""<user_data>
 
 <BUSINESS_PROFILE>
+  Business Name: {form_data.get('business_name', 'Not provided')}
   Business Type: {form_data.get('business_type', 'Not provided')}
   Location: {form_data.get('location', 'Not provided')}
 </BUSINESS_PROFILE>
@@ -336,6 +337,7 @@ def submit():
     session_id = str(uuid.uuid4())[:8]
 
     form_data = {
+        'business_name':    request.form.get('business_name', '').strip(),
         'business_type':    request.form.get('business_type', ''),
         'location':         request.form.get('location', ''),
         'monthly_spend':    request.form.get('monthly_spend', ''),
@@ -358,7 +360,7 @@ def submit():
         invoice_file.save(invoice_path)
 
     # Log the incoming submission
-    logger.info(f"[{session_id}] New audit: {form_data['business_type']} | {form_data['location']} | ${form_data['monthly_spend']}/mo | email: {form_data.get('email') or 'none'}")
+    logger.info(f"[{session_id}] New audit: {form_data.get('business_name') or form_data['business_type']} | {form_data['location']} | ${form_data['monthly_spend']}/mo | email: {form_data.get('email') or 'none'}")
     log_session(session_id, "submission", {
         "business_type": form_data['business_type'],
         "location": form_data['location'],
@@ -376,11 +378,19 @@ def submit():
     token = str(uuid.uuid4())
     _jobs[token] = {
         "session_id": session_id,
-        "business_name": form_data.get('business_type', 'Business') + ' · ' + form_data.get('location', ''),
+        "business_name": form_data.get('business_name') or (form_data.get('business_type', 'Business') + ' · ' + form_data.get('location', '')),
         "message_content": message_content
     }
 
-    display_name = f"{form_data['business_type']} · {form_data['location']}" if form_data.get('location') else form_data['business_type']
+    business_name = form_data.get('business_name', '').strip()
+    biz_type = form_data.get('business_type', '')
+    location = form_data.get('location', '')
+    if business_name:
+        display_name = business_name
+    elif location:
+        display_name = f"{biz_type} · {location}"
+    else:
+        display_name = biz_type or 'Your Business'
 
     # ── Check promo code ──
     promo = form_data.get('promo_code', '').strip()
