@@ -11,7 +11,7 @@ from pypdf import PdfReader
 from pathlib import Path
 
 # ── App setup ──
-app = Flask(__name__, template_folder=os.path.join(os.path.dirname(__file__), 'Templates'))
+app = Flask(__name__, template_folder=os.path.join(os.path.dirname(__file__), 'templates'))
 UPLOAD_FOLDER = 'uploads'
 LOG_FOLDER = 'logs'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
